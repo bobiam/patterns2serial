@@ -71,13 +71,14 @@ int multiplier = 10;
 boolean fakeserial = false;
 
 void setup() {
-  size(1200,16);
+  size(600,8);
   String[] list = Serial.list();
   delay(20);
   println("Serial Ports List:");
   println(list);
   
-  fakeSerial();
+  
+  fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
  // serialConfigure("COM5");  // change these to your port names
   //serialConfigure("COM6");  // change these to your port names
 //  serialConfigure("/dev/ttyACM1");
@@ -85,7 +86,7 @@ void setup() {
   for (int i=0; i < 256; i++) {
     gammatable[i] = (int)(pow((float)i / 255.0, gamma) * 255.0 + 0.5);
   }
-   pg = createGraphics(1200, 16);
+   pg = createGraphics(600, 8);
    //pg.strokeWeight(15);
 }
 
@@ -136,7 +137,7 @@ void draw() {
     }
     // send the raw data to the LEDs  :-)
     if(!fakeserial) ledSerial[i].write(ledData);
-   image(pg,0,0, 72*multiplier, 8*multiplier);
+   image(pg,0,0, 600, 8);
   }
 }
 
