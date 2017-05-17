@@ -37,7 +37,7 @@ import java.awt.Rectangle;
 
 PGraphics pg;
 PGraphics pg_1;
-int blue = 0;
+int wp = 0; //wheel position, a counter that increments every draw, and cycles at 255.
 
 float gamma = 1.7;
 
@@ -84,6 +84,7 @@ void setup() {
 
 int j = 0; 
 int k = 0;
+
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
   framerate = 60.0; // TODO, how to read the frame rate???
@@ -91,10 +92,13 @@ void draw() {
     
     //off();
     //rainbow();
-    fireflies();
+    rain_columns();
+    //fireflies();
     //rand_columns();
+    //fade(10);
+    
     //rand_rows();
-    //all(255,0,0,100);
+    //all(255,0,0,50);
     //all(255,165,0,100);
     //all(255,255,0,100);
     //all(0,255,0,100);
@@ -130,6 +134,13 @@ void draw() {
     // send the raw data to the LEDs  :-)
     if(!fakeserial) ledSerial[i].write(ledData);
    image(pg,0,0, totalWidth,totalHeight);
+   
+    if(wp < 255)
+    {
+      wp++;
+    }else{
+      wp = 0;
+    }   
   }
 }
 
@@ -147,6 +158,18 @@ void rand_columns(){
    }
 }
 
+void rain_columns(){
+  pg.beginDraw();
+  wp++;
+  Wheel(pg,wp);
+  pg.line(j, 0, j, pg.height);
+  pg.endDraw(); 
+  if (j < pg.width) {
+       j++;
+   } else {
+       j = 0; 
+   }
+}
 
 void rainbrows(){
   pg.beginDraw();
@@ -174,11 +197,7 @@ void rainbrows(){
 
 void fireflies(){
   pg.beginDraw();
-  pg.stroke(0,0,0,random(5));
-  for(int i=0;i<pg.height;i++)
-  {
-    pg.line(0,i,pg.width,i);
-  }
+  fade(5);
   pg.stroke(0,255,0);
   pg.point(random(pg.width),random(pg.height));
   pg.endDraw();
@@ -223,7 +242,17 @@ void all(int r, int g, int b, int t){
        k = 0; 
    }
 }
-
+ //<>//
+void fade(int howMuch)
+{
+  pg.beginDraw();
+  pg.stroke(0,0,0,howMuch);
+  for(int i=0;i<pg.height;i++)
+  {
+    pg.line(0,i,pg.width,i);
+  }
+  pg.endDraw();
+}
 
 void Wheel(PGraphics p, int WheelPos) {
   WheelPos = 255 - WheelPos;
@@ -231,28 +260,40 @@ void Wheel(PGraphics p, int WheelPos) {
     p.stroke(255-WheelPos * 3, 0, WheelPos * 3);
   }
   if(WheelPos < 170) {
-    WheelPos -= 85;
+    WheelPos = WheelPos - 85;
     p.stroke(0, WheelPos * 3, 255 - WheelPos * 3);
   }
-  WheelPos -= 170;
-  p.stroke(WheelPos * 3, 255 - WheelPos * 3, 0);
+  if(WheelPos > 169) {
+    WheelPos = WheelPos - 170;
+    p.stroke(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
 }
+
+/*
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle() {
+  int i, j;
+  pg.beginDraw();
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< totalWidth * totalHeight; i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+  pg.endDraw();
+}
+*/
 
 void rainbow()
 {
-  int wp = 0;
+
   pg.beginDraw();
   for(int i=0;i<pg.width;i++)
   {
     for(int j=0;j<pg.height;j++){
       pg.point(i,j);
       Wheel(pg,wp);
-      if(wp < 255)
-      {
-        wp++;
-      }else{
-        wp = 0;
-      }
     }
   }
   pg.endDraw();  
