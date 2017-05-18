@@ -71,7 +71,7 @@ void setup() {
   
   
   fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
- // serialConfigure("COM5");  // change these to your port names
+  //serialConfigure("COM5");  // change these to your port names
   //serialConfigure("COM6");  // change these to your port names
 //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
@@ -85,19 +85,23 @@ void setup() {
 int j = 0; 
 int k = 0;
 
+int frame_count = 0;
+
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
+  frame_count++;
   framerate = 60.0; // TODO, how to read the frame rate???
   for (int i=0; i < numPorts; i++) {
     
     //off();
     //rainbow();
-    rain_columns();
-    //fireflies();
+    //rain_columns();
+    //fireflies(20,25,255,255,255);  //accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel).  It also accepts r,g,b values of the color to use.
     //rand_columns();
-    //fade(10);
+    //randy(20,10);  //randy accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel)
+    //fade(20);
     
-    //rand_rows();
+    rand_rows();
     //all(255,0,0,50);
     //all(255,165,0,100);
     //all(255,255,0,100);
@@ -171,6 +175,7 @@ void rain_columns(){
    }
 }
 
+
 void rainbrows(){
   pg.beginDraw();
     //pg.background(0);
@@ -195,11 +200,26 @@ void rainbrows(){
 
 }
 
-void fireflies(){
+void fireflies(int fade_amount, int frequency, int r, int g, int b){
   pg.beginDraw();
-  fade(5);
-  pg.stroke(0,255,0);
-  pg.point(random(pg.width),random(pg.height));
+  pg.stroke(r,g,b);
+  if(frame_count % frequency == 0)
+  {
+    pg.point(random(pg.width),random(pg.height));
+  }
+  fade(fade_amount);  
+  pg.endDraw();
+  
+}
+
+void randy(int fade_amount, int frequency){
+  pg.beginDraw();
+  pg.stroke(random(255),random(255),random(255));
+  if(frame_count % frequency == 0)
+  {
+    pg.point(random(pg.width),random(pg.height));
+  }
+  fade(fade_amount);  
   pg.endDraw();
   
 }
@@ -222,7 +242,7 @@ void off(){
     //pg.background(0);
   pg.stroke(0,0,0, 100);
   pg.line(0, k, pg.width, k);
-  pg.endDraw(); 
+  pg.endDraw();  //<>//
   if (k < pg.height) {
        k++;
    } else {
@@ -242,7 +262,7 @@ void all(int r, int g, int b, int t){
        k = 0; 
    }
 }
- //<>//
+
 void fade(int howMuch)
 {
   pg.beginDraw();
@@ -268,22 +288,6 @@ void Wheel(PGraphics p, int WheelPos) {
     p.stroke(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 }
-
-/*
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle() {
-  int i, j;
-  pg.beginDraw();
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< totalWidth * totalHeight; i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-    }
-    strip.show();
-    delay(wait);
-  }
-  pg.endDraw();
-}
-*/
 
 void rainbow()
 {
@@ -388,6 +392,7 @@ void serialConfigure(String portName) {
                      Integer.parseInt(param[7]), Integer.parseInt(param[8]));
   ledLayout[numPorts] = (Integer.parseInt(param[5]) == 0);
   numPorts++;
+  //println(Integer.parseInt(param[0]));
 }
 
 // scale a number by a percentage, from 0 to 100
