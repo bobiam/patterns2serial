@@ -55,12 +55,14 @@ int[] gammatable = new int[256];
 int errorCount=0;
 float framerate=0;
 
+
 int multiplier = 10;
 
 boolean fakeserial = false;
 
 void settings(){
   size(totalWidth,totalHeight);
+  framerate = 60;
 }
 
 void setup() {
@@ -68,7 +70,7 @@ void setup() {
   delay(20);
   println("Serial Ports List:");
   println(list);
-  
+  frameRate(framerate);  
   
   fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
   //serialConfigure("COM5");  // change these to your port names
@@ -79,6 +81,9 @@ void setup() {
     gammatable[i] = (int)(pow((float)i / 255.0, gamma) * 255.0 + 0.5);
   }
    pg = createGraphics(totalWidth,totalHeight);
+   pg.beginDraw();
+   pg.background(0);
+   pg.endDraw();
    //pg.strokeWeight(15);
 }
 
@@ -90,18 +95,16 @@ int frame_count = 0;
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
   frame_count++;
-  framerate = 60.0; // TODO, how to read the frame rate???
-  for (int i=0; i < numPorts; i++) {
-    
     //off();
-    //rainbow();
+    rainbow();
     //rain_columns();
+    //rain_dots();
     //fireflies(20,25,255,255,255);  //accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel).  It also accepts r,g,b values of the color to use.
     //rand_columns();
     //randy(20,10);  //randy accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel)
     //fade(20);
     
-    rand_rows();
+    //rand_rows();
     //all(255,0,0,50);
     //all(255,165,0,100);
     //all(255,255,0,100);
@@ -113,9 +116,15 @@ void draw() {
     //coldrums();
     //rainbrows();
     
-     
-     
-    // copy a portion of the movie's image to the LED image
+    if(wp < 255 && wp > -1)
+    {
+      wp++;
+    }else{
+      wp = 0;
+    }       
+    
+  for (int i=0; i < numPorts; i++) {
+    // copy a portion of the screen's image to the LED image
     int xoffset = percentage(pg.width, ledArea[i].x);
     int yoffset = percentage(pg.height, ledArea[i].y);
     int xwidth =  percentage(pg.width, ledArea[i].width);
@@ -136,15 +145,8 @@ void draw() {
       ledData[2] = 0;
     }
     // send the raw data to the LEDs  :-)
-    if(!fakeserial) ledSerial[i].write(ledData);
+   if(!fakeserial) ledSerial[i].write(ledData);
    image(pg,0,0, totalWidth,totalHeight);
-   
-    if(wp < 255)
-    {
-      wp++;
-    }else{
-      wp = 0;
-    }   
   }
 }
 
@@ -162,9 +164,13 @@ void rand_columns(){
    }
 }
 
+void rain_dots(){
+  pg.beginDraw();
+  
+}
+
 void rain_columns(){
   pg.beginDraw();
-  wp++;
   Wheel(pg,wp);
   pg.line(j, 0, j, pg.height);
   pg.endDraw(); 
@@ -274,32 +280,83 @@ void fade(int howMuch)
   pg.endDraw();
 }
 
+
 void Wheel(PGraphics p, int WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    p.stroke(255-WheelPos * 3, 0, WheelPos * 3);
+  int pos=WheelPos;
+  println("WheelPos is "+pos);
+  if(pos < 85) {
+    p.stroke(255-pos * 3, 0, pos * 3);
   }
-  if(WheelPos < 170) {
-    WheelPos = WheelPos - 85;
-    p.stroke(0, WheelPos * 3, 255 - WheelPos * 3);
+  else if(pos < 170) {
+    pos = pos - 85;
+    p.stroke(0, pos * 3, 255 - pos * 3);
   }
-  if(WheelPos > 169) {
-    WheelPos = WheelPos - 170;
-    p.stroke(WheelPos * 3, 255 - WheelPos * 3, 0);
+  else if(pos > 169) {
+    pos = pos - 170;
+    p.stroke(pos * 3, 255 - pos * 3, 0);
   }
+}
+int wheel_r(int WheelPos){
+  int pos = WheelPos;
+  println("R WheelPos is "+pos);  
+  int r = 0;
+  if(pos < 85){
+    r = 255-pos * 3;
+  }
+  else if(pos < 170)
+  {
+    r = 0;
+  }else if(pos > 169) {
+    pos = pos-170;
+    r = pos * 3;
+  }
+  return r;
+}
+
+int wheel_g(int WheelPos){
+  int pos = WheelPos;
+  println("G WheelPos is "+pos);  
+  int g = 0;
+  if(pos < 85){
+    g = 0;
+  }
+  else if(pos < 170)
+  {
+    pos = pos - 85;
+    g = pos * 3;
+  }else if(pos > 169) {
+    pos = pos - 170;
+    g = 255 - pos * 3;
+  }
+  return g;
+}
+
+int wheel_b(int WheelPos){
+  int pos = WheelPos;
+  println("B WheelPos is "+pos);  
+  int b = 0;
+  if(pos < 85){
+    b = pos * 3;
+  }
+  else if(pos < 170)
+  {
+    pos = pos - 85;
+    b = 255 - pos * 3;
+  }else if(pos > 169) {
+    pos = pos - 170;
+    b = 0;
+  }
+  return b;
 }
 
 void rainbow()
 {
 
   pg.beginDraw();
-  for(int i=0;i<pg.width;i++)
-  {
-    for(int j=0;j<pg.height;j++){
-      pg.point(i,j);
-      Wheel(pg,wp);
-    }
-  }
+  int r = wheel_r(wp);
+  int g = wheel_g(wp);
+  int b = wheel_b(wp);
+  pg.background(r,g,b);
   pg.endDraw();  
 }
 
