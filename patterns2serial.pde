@@ -1,7 +1,11 @@
 /*
-  patterns2serial uses the movie2serial code, but allows patterns to be drawn in processing.
+  patterns2serial uses the movie2serial code and other code I've found around the web, 
+  with a little bit of glue and a few patterns I've borrowed from older projects, 
+  but it allows patterns to be drawn in processing.
+  
   modified from movie2serial by Bob Eells, for use on L2Screen at Burning Flipside 2017.
-  I'm fine with the license Paul used carrying over into this code as well.
+  I'm fine with the license Paul used carrying over into this code as well.  Let's just 
+  agree to not sue each other over blinky light code.
 */  
   
 
@@ -89,39 +93,49 @@ void setup() {
 
 int j = 0; 
 int k = 0;
+int frequency = 1;
 
 int frame_count = 0;
 
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
   frame_count++;
-    //off();
-    rainbow();
-    //rain_columns();
-    //rain_dots();
-    //fireflies(20,25,255,255,255);  //accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel).  It also accepts r,g,b values of the color to use.
-    //rand_columns();
-    //randy(20,10);  //randy accepts a fade amount (% to fade towards black each frame) and a frequency (how often we draw a new pixel)
-    //fade(20);
+  
+  //check our global speed variable.
+  if(frame_count % frequency == 0)
+  {
+    //Lights a random column a random color.
+    //rand_columns(100);
+    //rand_columns(wp);
     
-    //rand_rows();
-    //all(255,0,0,50);
-    //all(255,165,0,100);
-    //all(255,255,0,100);
-    //all(0,255,0,100);
-    //all(0,0,255,100);
-    //all(75,0,130,100);
-    //all(238,130,238,100);    
-    //all(255,255,255,100);    
-    //coldrums();
-    //rainbrows();
+    //lights a randomized number of pods (0 to number_to_draw) with a random color.
+    //rand_dots(100000);    
+    
+    //spotlights on a rail?
+    //stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b)
+    //distance is the max distance from origin in the x axis
+    //stroke(1,50,255,255,255);
+    
+    //progressively send a wheel around the ring, one column at a time.
+    //rain_columns();
+    
+    //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
+    //rainbros();
+
+    //void rainbow_fade_all()
+    //set the entire screen to a rotating colorwheel, all pixels same fade
+    //rainbow_fade_all();
     
     if(wp < 255 && wp > -1)
     {
       wp++;
     }else{
       wp = 0;
-    }       
+    }           
+    
+  }
+    
+
     
   for (int i=0; i < numPorts; i++) {
     // copy a portion of the screen's image to the LED image
@@ -151,11 +165,19 @@ void draw() {
 }
 
 //Patterns
-void rand_columns(){
+
+//void rand_columns(int number_to_draw){
+//lights a randomized number of columns (0 to number_to_draw)
+//number to draw
+void rand_columns(int number_to_draw){
   pg.beginDraw();
   //pg.background(0);
   pg.stroke(random(255), random(255), random(255), 100);
-  pg.line(j, 0, j, pg.height);
+  for(int l=0;l< (int) random(number_to_draw);l++)
+  {
+    int k = (int) random(0,pg.width);
+    pg.line(k, 0, k, pg.height);
+  }
   pg.endDraw(); 
   if (j < pg.width) {
        j++;
@@ -164,11 +186,52 @@ void rand_columns(){
    }
 }
 
-void rain_dots(){
+//void rand_dots(int number_to_draw){
+//lights a randomized number of pods (0 to number_to_draw)
+//with a random color.
+void rand_dots(int number_to_draw){
   pg.beginDraw();
-  
+  for(int l = 0; l < (int) random(number_to_draw); l++){
+    int x = (int) random(0,pg.width);
+    int y = (int) random(0,pg.height);
+    pg.stroke(random(255), random(255), random(255), 100);
+    pg.point(x,y);
+  }
+  pg.endDraw();
 }
 
+//void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b){
+//special shoutout to jsonpoindexter, who made us realize we could make this go with this commit:
+//https://github.com/jsonpoindexter/PGraphics/commit/39a6b33dcfa50162aa44faa7e8374964029c4bea
+//todo: fix bug in number_of_strokes.
+void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b){
+  for(int k=0;k<number_of_strokes;k++)
+  {
+    int k_offset = 0;
+    if(k != 0 && number_of_strokes != 0){
+      k_offset = pg.width / number_of_strokes;
+    }
+    pg.beginDraw();
+    pg.strokeWeight(3);
+    pg.background(0);
+    pg.stroke(random(max_r), random(max_g), random(max_b), 100);
+    int point_x = AddWithWrap(j,k_offset,pg.width);
+    int r1 = int(random(distance));
+    int r2 = int(random(distance));
+    int sw = SubtractWithWrap(point_x,r1,pg.width);
+    int aw = AddWithWrap(point_x,r2,pg.width);
+    pg.line(j+k_offset, 0, random(sw,aw),pg.height);
+    pg.endDraw(); 
+  }
+  if (j < pg.width) {
+       j++;
+   } else {
+       j = 0; 
+   }
+}
+
+//void rain_columns(){
+//progressively sends a rainbow wheel around the ring
 void rain_columns(){
   pg.beginDraw();
   Wheel(pg,wp);
@@ -181,8 +244,9 @@ void rain_columns(){
    }
 }
 
-
-void rainbrows(){
+//void rainbros(){
+//paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
+void rainbros(){
   pg.beginDraw();
     //pg.background(0);
   pg.stroke(255, 0,0, 100);
@@ -206,7 +270,10 @@ void rainbrows(){
 
 }
 
-void fireflies(int fade_amount, int frequency, int r, int g, int b){
+//void fireflies(int fade_amount, int r, int g, int b){
+  //simulate fireflies
+  //fade_amount is a percentage
+void fireflies(int fade_amount, int r, int g, int b){
   pg.beginDraw();
   pg.stroke(r,g,b);
   if(frame_count % frequency == 0)
@@ -218,31 +285,48 @@ void fireflies(int fade_amount, int frequency, int r, int g, int b){
   
 }
 
-void randy(int fade_amount, int frequency){
+//void randy(int fade_amount)
+//randy accepts:
+// a fade amount (% to fade towards black each frame) and 
+
+void randy(int fade_amount){
   pg.beginDraw();
   pg.stroke(random(255),random(255),random(255));
-  if(frame_count % frequency == 0)
-  {
-    pg.point(random(pg.width),random(pg.height));
-  }
+  pg.point(random(pg.width),random(pg.height));
   fade(fade_amount);  
   pg.endDraw();
   
 }
 
+//sets a random row to a random color
 void rand_rows(){
   pg.beginDraw();
-    //pg.background(0);
   pg.stroke(random(255), random(255), random(255), 100);
-  pg.line(0, k, pg.width, k);
+  int row = (int) random(pg.height);
+  pg.line(0, row, pg.width, row);
   pg.endDraw(); 
-  if (k < pg.height) {
-       k++;
-   } else {
-       k = 0; 
-   }
 }
 
+
+//void rainbow_fade_all()
+//set the entire screen to a rotating colorwheel, all pixels same fade
+void rainbow_fade_all()
+{
+
+  pg.beginDraw();
+  int r = wheel_r(wp);
+  int g = wheel_g(wp);
+  int b = wheel_b(wp);
+  pg.background(r,g,b);
+  pg.endDraw();  
+}
+
+ //End of patterns.
+ 
+ 
+ //Helpful tools follow
+
+//nope, not gonna do it
 void off(){
   pg.beginDraw();
     //pg.background(0);
@@ -256,31 +340,41 @@ void off(){
    }
 }
 
+//set everything to a color 
 void all(int r, int g, int b, int t){
   pg.beginDraw();
-    //pg.background(0);
+  pg.background(r,g,b,t);
+  pg.endDraw(); 
+  /*
   pg.stroke(r,g,b, t);
   pg.line(0, k, pg.width, k);
-  pg.endDraw(); 
   if (k < pg.height) {
        k++;
    } else {
        k = 0; 
    }
+   */
 }
 
+//void fade(int howMuch) 
+//how much is the percent transparency of the black layer being drawn in 
 void fade(int howMuch)
 {
   pg.beginDraw();
+  /*
   pg.stroke(0,0,0,howMuch);
   for(int i=0;i<pg.height;i++)
   {
     pg.line(0,i,pg.width,i);
   }
+  */
+  pg.background(0,0,0,howMuch);
   pg.endDraw();
 }
 
 
+//Get a nice rotating colorwheel.  Adapted from adafruit's Neopixel library.
+//Fixed by chainsaw, since Bob can't math.
 void Wheel(PGraphics p, int WheelPos) {
   int pos=WheelPos;
   println("WheelPos is "+pos);
@@ -296,6 +390,9 @@ void Wheel(PGraphics p, int WheelPos) {
     p.stroke(pos * 3, 255 - pos * 3, 0);
   }
 }
+
+//return specific components from Wheel, 
+//useful if you need the r,g,b values instead of stroke set for you
 int wheel_r(int WheelPos){
   int pos = WheelPos;
   println("R WheelPos is "+pos);  
@@ -313,6 +410,8 @@ int wheel_r(int WheelPos){
   return r;
 }
 
+//return specific components from Wheel, 
+//useful if you need the r,g,b values instead of stroke set for you
 int wheel_g(int WheelPos){
   int pos = WheelPos;
   println("G WheelPos is "+pos);  
@@ -331,6 +430,8 @@ int wheel_g(int WheelPos){
   return g;
 }
 
+//return specific components from Wheel, 
+//useful if you need the r,g,b values instead of stroke set for you
 int wheel_b(int WheelPos){
   int pos = WheelPos;
   println("B WheelPos is "+pos);  
@@ -348,19 +449,6 @@ int wheel_b(int WheelPos){
   }
   return b;
 }
-
-void rainbow()
-{
-
-  pg.beginDraw();
-  int r = wheel_r(wp);
-  int g = wheel_g(wp);
-  int b = wheel_b(wp);
-  pg.background(r,g,b);
-  pg.endDraw();  
-}
-
- 
 
 // image2data converts an image to OctoWS2811's raw data format.
 // The number of vertical pixels in the image must be a multiple
@@ -480,6 +568,7 @@ double percentageFloat(int percent) {
   return (double)percent / 100.0;
 }
 
+//pretend we're an L2Screen installation and allow us to write to a monitor only
 void fakeSerial(){
   ledImage[numPorts] = new PImage(300,8,RGB);
   ledArea[numPorts] = new Rectangle(0, 0, 50, 100);
@@ -490,4 +579,31 @@ void fakeSerial(){
   ledLayout[numPorts] = true;
   numPorts++;   
   fakeserial=true;
+}
+
+//int AddWithWrap(int a, int b, int wrap_at){
+  // adds with a wraparound
+  // int a = number to be added
+  // int b = number to be added
+  // int wrap_at = number to wrap beyond
+  int AddWithWrap(int a, int b, int wrap_at){
+  if(a+b < wrap_at)
+  {
+    return a+b;
+  }
+  return (a+b)-wrap_at;
+}
+
+//int SubtractWithWrap(int a, int b, int wrap_at){
+  // subtracts with a wraparound
+  // int a = number being subtracted from
+  // int b = number being subtracted
+  // int wrap_at = number to wrap beyond
+  
+int SubtractWithWrap(int a, int b, int wrap_at){
+  if(a-b > 0)
+  {
+    return a-b;
+  }
+  return (wrap_at+a)-b;
 }
