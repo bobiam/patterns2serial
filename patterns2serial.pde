@@ -48,8 +48,8 @@ float gamma = 1.7;
 int numPorts=0;  // the number of serial ports in use
 int maxPorts=24; // maximum number of serial ports
 
-static int totalWidth = 1200;
-static int totalHeight = 16;
+static int totalWidth = 600;
+static int totalHeight = 8;
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -108,6 +108,8 @@ void draw() {
     //rand_columns(100);
     //rand_columns(wp);
     
+    text_test();
+    
     //lights a randomized number of pods (0 to number_to_draw) with a random color.
     //rand_dots(100000);    
     
@@ -121,6 +123,14 @@ void draw() {
     
     //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
     //rainbros();
+    
+    //void fireflies(int fade_amount, int r, int g, int b){
+    //fade_amount is percentage, try 1-10 range for that.
+    //fireflies(5,0,255,0);
+  
+    //void randy(int fade_amount) 
+    //fade_amount is percentage, try 1-10
+    //randy(5);
 
     //void rainbow_fade_all()
     //set the entire screen to a rotating colorwheel, all pixels same fade
@@ -165,6 +175,22 @@ void draw() {
 }
 
 //Patterns
+
+//trying this out.  Caution: if you're going to use this, there's a lot to think about.
+//political and technical
+//political example: public perception based on what we write/allow written
+//technical example: Not sure this is going to display right anyway.
+void text_test()
+{
+    pg.beginDraw();
+    pg.smooth();
+    pg.background(0);
+    pg.fill(255);
+    pg.textAlign(CENTER, CENTER);
+    int multiplier = pg.width / 255;
+    pg.text("Hello World!",pg.width-wp*multiplier,pg.height/4);
+    pg.endDraw();
+}
 
 //void rand_columns(int number_to_draw){
 //lights a randomized number of columns (0 to number_to_draw)
@@ -276,10 +302,7 @@ void rainbros(){
 void fireflies(int fade_amount, int r, int g, int b){
   pg.beginDraw();
   pg.stroke(r,g,b);
-  if(frame_count % frequency == 0)
-  {
-    pg.point(random(pg.width),random(pg.height));
-  }
+  pg.point(random(pg.width),random(pg.height));
   fade(fade_amount);  
   pg.endDraw();
   
@@ -361,14 +384,11 @@ void all(int r, int g, int b, int t){
 void fade(int howMuch)
 {
   pg.beginDraw();
-  /*
   pg.stroke(0,0,0,howMuch);
   for(int i=0;i<pg.height;i++)
   {
     pg.line(0,i,pg.width,i);
   }
-  */
-  pg.background(0,0,0,howMuch);
   pg.endDraw();
 }
 
