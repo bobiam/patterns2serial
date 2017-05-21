@@ -61,8 +61,8 @@ float framerate=0;
 boolean directionToggle = true;
 int multiplier = 10;
 boolean fakeserial = false;
-PImage photo;
-PImage photo2;
+PImage photo1, photo2, photo3;
+
 
 void settings(){
   size(totalWidth,totalHeight);
@@ -76,9 +76,9 @@ void setup() {
   println(list);
   frameRate(framerate);  
   
-  //there are 2385 results on tineye for this jpg, I don't know who to credit
-  photo = loadImage("rainbow-4_small.jpg");
-  photo2 = loadImage("rainbow-4.jpg");
+  photo1 = loadImage("fire.jpg");
+  photo2 = loadImage("rainbow_like.jpg");
+  photo3 = loadImage("rainbow_cubes2.jpg");
   
   fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
   //serialConfigure("COM5");  // change these to your port names
@@ -107,7 +107,9 @@ void draw() {
   if(frameCount % frequency == 0)
   {
     
-     image_bounce(photo2);
+     image_bounce(photo1);
+     //image_bounce(photo2);
+     //image_bounce(photo3);
      
     //Lights a random column a random color.
     //rand_columns(100);
@@ -151,8 +153,7 @@ void draw() {
     }else{
       directionToggle = ! directionToggle;
       wp = 0;
-    }           
-    
+    }               
   }
     
 
