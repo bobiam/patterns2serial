@@ -66,7 +66,7 @@ boolean fakeserial = false;
 
 void settings(){
   size(totalWidth,totalHeight);
-  framerate = 60;
+  framerate = 100;
 }
 
 void setup() {
@@ -95,20 +95,18 @@ int j = 0;
 int k = 0;
 int frequency = 1;
 
-int frame_count = 0;
+
 
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
-  frame_count++;
-  
   //check our global speed variable.
-  if(frame_count % frequency == 0)
+  if(frameCount % frequency == 0)
   {
     //Lights a random column a random color.
     //rand_columns(100);
-    //rand_columns(wp);
+    rand_columns(wp);
     
-    text_test();
+    //text_test();
     
     //lights a randomized number of pods (0 to number_to_draw) with a random color.
     //rand_dots(100000);    
@@ -120,6 +118,7 @@ void draw() {
     
     //progressively send a wheel around the ring, one column at a time.
     //rain_columns();
+    //off();
     
     //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
     //rainbros();
