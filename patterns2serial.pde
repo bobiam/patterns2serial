@@ -33,6 +33,10 @@
     THE SOFTWARE.
 */
 
+//From now on, just disable/enable serial here 
+//you may still need to update your COM ports in the serialConfigure() calls below 
+boolean fakeserial = true;
+
 import processing.video.*;
 import processing.serial.*;
 import java.awt.Rectangle;
@@ -60,9 +64,8 @@ int errorCount=0;
 float framerate=0;
 boolean directionToggle = true;
 int multiplier = 10;
-boolean fakeserial = false;
-PImage photo1, photo2, photo3;
-
+PImage photo1, photo2, photo3, photo4, photo5;
+int current_pattern;
 
 void settings(){
   size(totalWidth,totalHeight);
@@ -75,14 +78,21 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
+  current_pattern = 0;
   
   photo1 = loadImage("fire.jpg");
   photo2 = loadImage("rainbow_like.jpg");
-  photo3 = loadImage("rainbow_cubes2.jpg");
+  photo3 = loadImage("rainbow_cubes.jpg");  
+  photo4 = loadImage("rainbow_cubes2.jpg");
+  photo5 = loadImage("rainbow_rain.jpg");
   
-  fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
-  //serialConfigure("COM5");  // change these to your port names
-  //serialConfigure("COM6");  // change these to your port names
+  if(fakeserial)
+  {
+    fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
+  }else{
+    serialConfigure("COM5");  // change these to your port names
+    serialConfigure("COM6");  // change these to your port names
+  }
 //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
   for (int i=0; i < 256; i++) {
@@ -98,58 +108,21 @@ void setup() {
 int j = 0; 
 int k = 0;
 int frequency = 1;
-
-
+int oscillator = 0;
 
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
   //check our global speed variable.
-  if(frameCount % frequency == 0)
+  if(frequency != 0 && frameCount % frequency == 0)
   {
-    
-     image_bounce(photo1);
-     //image_bounce(photo2);
-     //image_bounce(photo3);
-     
-    //Lights a random column a random color.
-    //rand_columns(100);
-    //rand_columns(wp);
-    
-    //draws random ellipses
-    //ellipses();
-    
-    //text_test();
-    
-    //lights a randomized number of pods (0 to number_to_draw) with a random color.
-    //rand_dots(100000);    
-    
-    //spotlights on a rail?
-    //stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b)
-    //distance is the max distance from origin in the x axis
-    //stroke(1,50,255,255,255);
-    
-    //progressively send a wheel around the ring, one column at a time.
-    //rain_columns();
-    //off();
-    
-    //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
-    //rainbros();
-    
-    //void fireflies(int fade_amount, int r, int g, int b){
-    //fade_amount is percentage, try 1-10 range for that.
-    //fireflies(5,0,255,0);
-  
-    //void randy(int fade_amount) 
-    //fade_amount is percentage, try 1-10
-    //randy(5);
-
-    //void rainbow_fade_all()
-    //set the entire screen to a rotating colorwheel, all pixels same fade
-    //rainbow_fade_all();
+    callPattern(current_pattern);
     
     if(wp < 255 && wp > -1)
     {
       wp++;
+      oscillator = wp;
+      if(directionToggle)
+        oscillator = 255-wp;
     }else{
       directionToggle = ! directionToggle;
       wp = 0;
@@ -186,6 +159,32 @@ void draw() {
 }
 
 //Patterns
+
+void image_zoomer(PImage img)
+{
+  pg.beginDraw();
+  //int w_ratio = img.width / 50;
+  //int h_ratio = img.height / 50;
+  //pg.image(img,0-oscillator*w_ratio,0-oscillator*h_ratio,img.width+oscillator*w_ratio,img.height+oscillator*h_ratio);
+  pg.image(img,0-oscillator,0-oscillator,img.width+oscillator*2,img.height+oscillator*2);  
+  pg.endDraw();  
+}
+
+void image_shaker(PImage img)
+{
+  pg.beginDraw();
+  pg.image(img,0-random(oscillator),0-random(oscillator),img.width,img.height);
+  pg.endDraw();
+}
+
+void image_panner(PImage img)
+{
+  pg.beginDraw();
+  int w_ratio = img.width / 255;
+  int h_ratio = img.height / 255;
+  pg.image(img,0-oscillator,0-oscillator,img.width,img.height);
+  pg.endDraw();
+}
 
 //void image_bounce(PImage img)
 //simple up/down animation
@@ -337,6 +336,7 @@ void rainbros(){
   //simulate fireflies
   //fade_amount is a percentage
 void fireflies(int fade_amount, int r, int g, int b){
+  pg.strokeWeight(1);  
   pg.beginDraw();
   pg.stroke(r,g,b);
   pg.point(random(pg.width),random(pg.height));
@@ -385,8 +385,88 @@ void rainbow_fade_all()
  
  
  //Helpful tools follow
+ 
+ void mouseClicked(){
+   current_pattern++;
+   if(current_pattern > 13)
+     current_pattern = 0;
+ }
 
-//nope, not gonna do it
+void callPattern(int pattern_number){
+  //default all patterns to normal speed
+  frequency = 1;
+  
+  switch(pattern_number){
+    case 0 :
+      rainbros();
+      break;
+    case 1 :
+      image_zoomer(photo1);
+      break;
+    case 2 : 
+      image_shaker(photo2);
+      break;
+    case 3 :
+      frequency = 3;
+      image_bounce(photo4);
+      break;
+    case 4 :
+      rand_columns(wp);
+      break;
+    case 5 :
+      ellipses();
+      break;
+    case 6 : 
+      text_test();
+      break;
+    case 7 : 
+      rand_dots(100000);
+      break;
+    case 8 : 
+      stroke(1,50,255,255,255);
+      break;
+    case 9 : 
+      rain_columns();
+      break;
+    case 10 :
+      frequency = 3;
+      image_panner(photo3);
+      break;
+    case 11 :
+      fireflies(5,0,255,0);
+      break;
+    case 12 :
+      randy(5);
+      break;
+    case 13 : 
+      rainbow_fade_all();
+      break;      
+    default :
+      off();
+      break;
+  }
+}
+    
+    //progressively send a wheel around the ring, one column at a time.
+    //rain_columns();
+    //off();
+    
+    //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
+    //rainbros();
+    
+    //void fireflies(int fade_amount, int r, int g, int b){
+    //fade_amount is percentage, try 1-10 range for that.
+    //fireflies(5,0,255,0);
+    
+    //void randy(int fade_amount) 
+    //fade_amount is percentage, try 1-10
+    //randy(5);
+    
+    //void rainbow_fade_all()
+    //set the entire screen to a rotating colorwheel, all pixels same fade
+    //rainbow_fade_all();
+    
+//nope, not gonna document this any further
 void off(){
   pg.beginDraw();
     //pg.background(0);
@@ -434,7 +514,6 @@ void fade(int howMuch)
 //Fixed by chainsaw, since Bob can't math.
 void Wheel(PGraphics p, int WheelPos) {
   int pos=WheelPos;
-  println("WheelPos is "+pos);
   if(pos < 85) {
     p.stroke(255-pos * 3, 0, pos * 3);
   }
@@ -452,7 +531,6 @@ void Wheel(PGraphics p, int WheelPos) {
 //useful if you need the r,g,b values instead of stroke set for you
 int wheel_r(int WheelPos){
   int pos = WheelPos;
-  println("R WheelPos is "+pos);  
   int r = 0;
   if(pos < 85){
     r = 255-pos * 3;
@@ -471,7 +549,6 @@ int wheel_r(int WheelPos){
 //useful if you need the r,g,b values instead of stroke set for you
 int wheel_g(int WheelPos){
   int pos = WheelPos;
-  println("G WheelPos is "+pos);  
   int g = 0;
   if(pos < 85){
     g = 0;
@@ -491,7 +568,6 @@ int wheel_g(int WheelPos){
 //useful if you need the r,g,b values instead of stroke set for you
 int wheel_b(int WheelPos){
   int pos = WheelPos;
-  println("B WheelPos is "+pos);  
   int b = 0;
   if(pos < 85){
     b = pos * 3;
