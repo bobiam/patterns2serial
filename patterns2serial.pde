@@ -1,3 +1,7 @@
+//From now on, just disable/enable serial here 
+//you may still need to update your COM ports in the serialConfigure() calls below 
+boolean fakeserial = true;
+
 /*
   patterns2serial uses the movie2serial code and other code I've found around the web, 
   with a little bit of glue and a few patterns I've borrowed from older projects, 
@@ -32,10 +36,6 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 */
-
-//From now on, just disable/enable serial here 
-//you may still need to update your COM ports in the serialConfigure() calls below 
-boolean fakeserial = true;
 
 import processing.video.*;
 import processing.serial.*;
@@ -78,7 +78,7 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
-  current_pattern = 0;
+  current_pattern = 14;
   
   photo1 = loadImage("fire.jpg");
   photo2 = loadImage("rainbow_like.jpg");
@@ -109,6 +109,7 @@ int j = 0;
 int k = 0;
 int frequency = 1;
 int oscillator = 0;
+int x_wrap = 0;
 
 // draw runs every time the screen is redrawn - show the pattern...
 void draw() {
@@ -116,6 +117,8 @@ void draw() {
   if(frequency != 0 && frameCount % frequency == 0)
   {
     callPattern(current_pattern);
+    
+    x_wrap = AddWithWrap(x_wrap,1,pg.width);
     
     if(wp < 255 && wp > -1)
     {
@@ -217,6 +220,14 @@ void text_test()
     int multiplier = pg.width / 255;
     pg.text("Hello World!",pg.width-wp*multiplier,pg.height/4);
     pg.endDraw();
+}
+
+//runs a circle around the ring
+void play_ball(){
+  pg.beginDraw();
+  pg.fill(wheel_r(wp),wheel_g(wp),wheel_b(wp));
+  pg.ellipse(x_wrap,4,8,8);
+  pg.endDraw();
 }
 
 //draws a bunch of random ovals.  Mostly just playing with shapes.
@@ -433,14 +444,18 @@ void callPattern(int pattern_number){
       image_panner(photo3);
       break;
     case 11 :
-      fireflies(5,0,255,0);
+      fireflies(20,0,255,0);
       break;
     case 12 :
-      randy(5);
+      randy(20);
       break;
     case 13 : 
       rainbow_fade_all();
       break;      
+    case 14:
+      play_ball();
+      off();
+      break;
     default :
       off();
       break;
