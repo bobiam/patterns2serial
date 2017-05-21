@@ -58,6 +58,7 @@ PImage[] ledImage = new PImage[maxPorts];      // image sent to each port
 int[] gammatable = new int[256];
 int errorCount=0;
 float framerate=0;
+boolean directionToggle = true;
 int multiplier = 10;
 boolean fakeserial = false;
 PImage photo;
@@ -74,12 +75,14 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
+  
+  //there are 2385 results on tineye for this jpg, I don't know who to credit
   photo = loadImage("rainbow-4_small.jpg");
   photo2 = loadImage("rainbow-4.jpg");
   
-  //fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
-  serialConfigure("COM5");  // change these to your port names
-  serialConfigure("COM6");  // change these to your port names
+  fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
+  //serialConfigure("COM5");  // change these to your port names
+  //serialConfigure("COM6");  // change these to your port names
 //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
   for (int i=0; i < 256; i++) {
@@ -104,7 +107,8 @@ void draw() {
   if(frameCount % frequency == 0)
   {
     
-    image_test();
+     image_bounce(photo2);
+     
     //Lights a random column a random color.
     //rand_columns(100);
     //rand_columns(wp);
@@ -145,6 +149,7 @@ void draw() {
     {
       wp++;
     }else{
+      directionToggle = ! directionToggle;
       wp = 0;
     }           
     
@@ -181,11 +186,18 @@ void draw() {
 
 //Patterns
 
-//basic image load and animation
-void image_test()
+//void image_bounce(PImage img)
+//simple up/down animation
+void image_bounce(PImage img)
 {
-  pg.beginDraw();
-  pg.image(photo2,0,wp % 8,pg.width,pg.height);
+  pg.beginDraw();  
+  int h_multiplier = img.height / 255;
+  if(directionToggle)
+  {
+    pg.image(img,0,0-wp*h_multiplier,pg.width,img.height);
+  }else{
+    pg.image(img,0,0-255*h_multiplier+wp*h_multiplier,pg.width,img.height);
+  }
   //pg.background(photo);
   pg.endDraw();
 }
@@ -207,6 +219,7 @@ void text_test()
     pg.endDraw();
 }
 
+//draws a bunch of random ovals.  Mostly just playing with shapes.
 void ellipses(){
   pg.beginDraw();
   pg.smooth();
