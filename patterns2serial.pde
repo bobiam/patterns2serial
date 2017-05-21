@@ -104,7 +104,10 @@ void draw() {
   {
     //Lights a random column a random color.
     //rand_columns(100);
-    rand_columns(wp);
+    //rand_columns(wp);
+    
+    //draws random ellipses
+    ellipses();
     
     //text_test();
     
@@ -189,6 +192,14 @@ void text_test()
     int multiplier = pg.width / 255;
     pg.text("Hello World!",pg.width-wp*multiplier,pg.height/4);
     pg.endDraw();
+}
+
+void ellipses(){
+  pg.beginDraw();
+  pg.smooth();
+  pg.fill(random(255),random(255),random(255));
+  pg.ellipse(random(pg.width),random(pg.height),random(20),random(20));
+  pg.endDraw();
 }
 
 //void rand_columns(int number_to_draw){
