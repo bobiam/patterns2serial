@@ -61,6 +61,7 @@ float framerate=0;
 int multiplier = 10;
 boolean fakeserial = false;
 PImage photo;
+PImage photo2;
 
 void settings(){
   size(totalWidth,totalHeight);
@@ -74,6 +75,7 @@ void setup() {
   println(list);
   frameRate(framerate);  
   photo = loadImage("rainbow-4_small.jpg");
+  photo2 = loadImage("rainbow-4.jpg");
   
   //fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
   serialConfigure("COM5");  // change these to your port names
@@ -179,10 +181,12 @@ void draw() {
 
 //Patterns
 
+//basic image load and animation
 void image_test()
 {
   pg.beginDraw();
-  pg.background(photo);
+  pg.image(photo2,0,wp % 8,pg.width,pg.height);
+  //pg.background(photo);
   pg.endDraw();
 }
 
