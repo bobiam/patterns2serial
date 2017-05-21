@@ -58,11 +58,9 @@ PImage[] ledImage = new PImage[maxPorts];      // image sent to each port
 int[] gammatable = new int[256];
 int errorCount=0;
 float framerate=0;
-
-
 int multiplier = 10;
-
 boolean fakeserial = false;
+PImage photo;
 
 void settings(){
   size(totalWidth,totalHeight);
@@ -75,10 +73,11 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
+  photo = loadImage("rainbow-4_small.jpg");
   
-  fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
-  //serialConfigure("COM5");  // change these to your port names
-  //serialConfigure("COM6");  // change these to your port names
+  //fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
+  serialConfigure("COM5");  // change these to your port names
+  serialConfigure("COM6");  // change these to your port names
 //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
   for (int i=0; i < 256; i++) {
@@ -102,12 +101,14 @@ void draw() {
   //check our global speed variable.
   if(frameCount % frequency == 0)
   {
+    
+    image_test();
     //Lights a random column a random color.
     //rand_columns(100);
     //rand_columns(wp);
     
     //draws random ellipses
-    ellipses();
+    //ellipses();
     
     //text_test();
     
@@ -178,6 +179,14 @@ void draw() {
 
 //Patterns
 
+void image_test()
+{
+  pg.beginDraw();
+  pg.background(photo);
+  pg.endDraw();
+}
+
+//void text_test()
 //trying this out.  Caution: if you're going to use this, there's a lot to think about.
 //political and technical
 //political example: public perception based on what we write/allow written
