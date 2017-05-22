@@ -54,6 +54,7 @@ int maxPorts=24; // maximum number of serial ports
 
 static int totalWidth = 600;
 static int totalHeight = 8;
+static int max_pattern = 16;
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -68,6 +69,14 @@ int multiplier = 10;
 PImage[] images = new PImage[36];
 int current_pattern;
 
+float angle=0;
+float anglespeed=.01;
+float anglemagnitude = 10;
+
+float angle2=0;
+float anglespeed2=.007;
+float anglemagnitude2 = 300;
+
 void settings(){
   size(totalWidth,totalHeight);
   framerate = 100;
@@ -79,7 +88,7 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
-  current_pattern = 14;
+  current_pattern = 16;
   for(int i=0;i<images.length;i++)
   {
     images[i] = loadImage("images/"+nf(i,2)+".jpg");
@@ -117,6 +126,12 @@ void draw() {
     callPattern(current_pattern);
     
     x_wrap = AddWithWrap(x_wrap,1,pg.width);
+    
+    angle += anglespeed;
+    if (angle >=6.28) angle = 0;
+    
+        angle2 += anglespeed2;
+    if (angle2 >=6.28) angle2 = 0;
     
     if(wp < 255 && wp > -1)
     {
@@ -164,6 +179,14 @@ void draw() {
 }
 
 //Patterns
+void image_rotater(PImage img)
+{
+  pg.beginDraw();
+  pg.image(img,0,0,img.width,img.height);  
+  rotate(radians(wp%8 * 45));
+  pg.endDraw();    
+
+}
 
 void image_zoomer(PImage img)
 {
@@ -200,6 +223,20 @@ void image_bounce(PImage img)
   }
   //pg.background(photo);
   pg.endDraw();
+}
+
+//void image_complex(PImage img) {
+// A more "refined" image handler, by Chainsaw.
+void image_complex(PImage img) {  
+    pg.imageMode(CENTER); 
+  pg.beginDraw();
+  pg.image(img,0-anglemagnitude*(1+sin(angle)),0-anglemagnitude*(1+cos(angle)));
+    pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
+    println(angle);
+    pg.rotate(angle);
+    pg.image(img, 0, 0,img.width + anglemagnitude2*(1+sin(angle2)),img.height+ anglemagnitude2*(1+cos(angle2)));
+  pg.endDraw();  
+  
 }
 
 //void text_test()
@@ -395,8 +432,13 @@ void rainbow_fade_all()
  //Helpful tools follow
  
  void mouseClicked(){
+   if(mouseX < pg.width / 2){
+     current_pattern--;
+     if(current_pattern < 0)
+       current_pattern = max_pattern;
+   }
    current_pattern++;
-   if(current_pattern > 13)
+   if(current_pattern > max_pattern)
      current_pattern = 0;
  }
 
@@ -453,6 +495,12 @@ void callPattern(int pattern_number){
     case 14:
       play_ball();
       off();
+      break;
+    case 15:
+      image_rotater(nowImage);
+      break;
+    case 16:
+      image_complex(nowImage);
       break;
     default :
       off();
