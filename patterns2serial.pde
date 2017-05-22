@@ -55,7 +55,7 @@ int maxPorts=24; // maximum number of serial ports
 static int totalWidth = 600;
 static int totalHeight = 8;
 static int max_pattern = 16;
-static int total_images = 50;
+static int total_images = 69;
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -229,13 +229,13 @@ void image_bounce(PImage img)
 //void image_complex(PImage img) {
 // A more "refined" image handler, by Chainsaw.
 void image_complex(PImage img) {  
-    pg.imageMode(CENTER); 
+  pg.imageMode(CENTER); 
   pg.beginDraw();
   pg.image(img,0-anglemagnitude*(1+sin(angle)),0-anglemagnitude*(1+cos(angle)));
-    pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
-    println(angle);
-    pg.rotate(angle);
-    pg.image(img, 0, 0,img.width + anglemagnitude2*(1+sin(angle2)),img.height+ anglemagnitude2*(1+cos(angle2)));
+  pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
+  //println(angle);
+  pg.rotate(angle);
+  pg.image(img, 0, 0,img.width + anglemagnitude2*(1+sin(angle2)),img.height+ anglemagnitude2*(1+cos(angle2)));
   pg.endDraw();  
   
 }
