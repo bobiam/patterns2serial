@@ -130,7 +130,6 @@ void draw() {
     
     angle += anglespeed;
     if (angle >=6.28) angle = 0;
-    
         angle2 += anglespeed2;
     if (angle2 >=6.28) angle2 = 0;
     
@@ -142,6 +141,7 @@ void draw() {
         oscillator = 255-wp;
     }else{
       directionToggle = ! directionToggle;
+      if(random(5) < 2) anglespeed = -anglespeed;
       wp = 0;
     }               
     
@@ -228,16 +228,22 @@ void image_bounce(PImage img)
 
 //void image_complex(PImage img) {
 // A more "refined" image handler, by Chainsaw.
-void image_complex(PImage img) {  
+void image_complex(PImage img) {
   pg.imageMode(CENTER); 
+  pg.colorMode(HSB);
   pg.beginDraw();
   pg.image(img,0-anglemagnitude*(1+sin(angle)),0-anglemagnitude*(1+cos(angle)));
   pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
-  //println(angle);
   pg.rotate(angle);
-  pg.image(img, 0, 0,img.width + anglemagnitude2*(1+sin(angle2)),img.height+ anglemagnitude2*(1+cos(angle2)));
+  pg.image(img, 0-anglemagnitude*(1+sin(angle)), 0-anglemagnitude*(1+cos(angle)),img.width + anglemagnitude2*(1+sin(angle2)),img.height+ anglemagnitude2*(1+cos(angle2)));
   pg.endDraw();  
-  
+  for (int x = 0; x < pg.width; x++) {
+    for (int y = 0; y < pg.height; y++ ) {
+      int loc = x + y*pg.width;
+      // Rotate hue by amount given in wheel
+       pg.pixels[loc]  =color((hue(pg.pixels[loc]) + wp )%256,saturation(pg.pixels[loc]),brightness(pg.pixels[loc]));  // White
+    }
+  }
 }
 
 //void text_test()
