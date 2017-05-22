@@ -54,8 +54,8 @@ int maxPorts=24; // maximum number of serial ports
 
 static int totalWidth = 600;
 static int totalHeight = 8;
-static int max_pattern = 16;
-static int total_images = 69;
+static int max_pattern = 16;  
+static int total_images = 72; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
