@@ -45,8 +45,8 @@ import java.awt.Rectangle;
 
 PGraphics pg;
 PGraphics pg_1;
-int wp = 0; //wheel position, a counter that increments every draw, and cycles at 255.
 
+int wp = 0; //wheel position, a counter that increments every draw, and cycles at 255.
 float gamma = 1.7;
 
 int numPorts=0;  // the number of serial ports in use
@@ -59,12 +59,13 @@ Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
 boolean[] ledLayout = new boolean[maxPorts];   // layout of rows, true = even is left->right
 PImage[] ledImage = new PImage[maxPorts];      // image sent to each port
+PImage nowImage;
 int[] gammatable = new int[256];
 int errorCount=0;
 float framerate=0;
 boolean directionToggle = true;
 int multiplier = 10;
-PImage nowImage;
+PImage[] images = new PImage[36];
 int current_pattern;
 
 void settings(){
@@ -128,6 +129,7 @@ void draw() {
       wp = 0;
     }               
     
+    if(frameCount % 2000 == 0){
       nowImage = images[floor(random(images.length))];
     }
   }
