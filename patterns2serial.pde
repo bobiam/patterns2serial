@@ -64,7 +64,7 @@ int errorCount=0;
 float framerate=0;
 boolean directionToggle = true;
 int multiplier = 10;
-PImage photo1, photo2, photo3, photo4, photo5;
+PImage nowImage;
 int current_pattern;
 
 void settings(){
@@ -79,13 +79,11 @@ void setup() {
   println(list);
   frameRate(framerate);  
   current_pattern = 14;
-  
-  photo1 = loadImage("fire.jpg");
-  photo2 = loadImage("rainbow_like.jpg");
-  photo3 = loadImage("rainbow_cubes.jpg");  
-  photo4 = loadImage("rainbow_cubes2.jpg");
-  photo5 = loadImage("rainbow_rain.jpg");
-  
+  for(int i=0;i<images.length;i++)
+  {
+    images[i] = loadImage("images/"+nf(i,2)+".jpg");
+  }
+  nowImage = images[floor(random(images.length))];
   if(fakeserial)
   {
     fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
@@ -102,7 +100,6 @@ void setup() {
    pg.beginDraw();
    pg.background(0);
    pg.endDraw();
-   //pg.strokeWeight(15);
 }
 
 int j = 0; 
@@ -130,6 +127,9 @@ void draw() {
       directionToggle = ! directionToggle;
       wp = 0;
     }               
+    
+      nowImage = images[floor(random(images.length))];
+    }
   }
     
 
@@ -166,9 +166,6 @@ void draw() {
 void image_zoomer(PImage img)
 {
   pg.beginDraw();
-  //int w_ratio = img.width / 50;
-  //int h_ratio = img.height / 50;
-  //pg.image(img,0-oscillator*w_ratio,0-oscillator*h_ratio,img.width+oscillator*w_ratio,img.height+oscillator*h_ratio);
   pg.image(img,0-oscillator,0-oscillator,img.width+oscillator*2,img.height+oscillator*2);  
   pg.endDraw();  
 }
@@ -183,8 +180,6 @@ void image_shaker(PImage img)
 void image_panner(PImage img)
 {
   pg.beginDraw();
-  int w_ratio = img.width / 255;
-  int h_ratio = img.height / 255;
   pg.image(img,0-oscillator,0-oscillator,img.width,img.height);
   pg.endDraw();
 }
@@ -412,20 +407,21 @@ void callPattern(int pattern_number){
       rainbros();
       break;
     case 1 :
-      image_zoomer(photo1);
+      image_zoomer(nowImage);
       break;
     case 2 : 
-      image_shaker(photo2);
+      frequency = 5;
+      image_shaker(nowImage);
       break;
     case 3 :
-      frequency = 3;
-      image_bounce(photo4);
+      image_bounce(nowImage);
       break;
     case 4 :
       rand_columns(wp);
       break;
     case 5 :
       ellipses();
+      fade(20);
       break;
     case 6 : 
       text_test();
@@ -441,7 +437,7 @@ void callPattern(int pattern_number){
       break;
     case 10 :
       frequency = 3;
-      image_panner(photo3);
+      image_panner(nowImage);
       break;
     case 11 :
       fireflies(20,0,255,0);
