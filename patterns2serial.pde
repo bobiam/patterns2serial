@@ -55,8 +55,8 @@ int maxPorts=24; // maximum number of serial ports
 static int totalWidth = 600; //render width, you can bump this if you're not really writing to the display
 static int totalHeight = 8;  //render height, you can bump this if you're not really writing to the display
 static int max_pattern = 17; //actual pattern number of the final pattern in the list.
-static int total_images = 1; //set to one for a quick initial start, good for debugging and/or guess and check pattern coding.
-//static int total_images = 72; //one more than last name, since we index images on 0.
+//static int total_images = 1; //set to one for a quick initial start, good for debugging and/or guess and check pattern coding.
+static int total_images = 72; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -366,6 +366,7 @@ void rain_columns() {
 void chase() {
   pg.beginDraw();
   pg.background(0);
+  Wheel(pg,x_wrap);
   pg.line(x_wrap,0,x_wrap,8);
   pg.endDraw(); 
 }
