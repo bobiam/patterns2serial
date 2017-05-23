@@ -351,7 +351,8 @@ void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b
 //progressively sends a rainbow wheel around the ring
 void rain_columns() {
   pg.beginDraw();
-  Wheel(pg, wp);
+  color c = Wheel(wp);
+  pg.stroke(c);
   pg.line(j, 0, j, pg.height);
   pg.endDraw(); 
   if (j < pg.width) {
@@ -592,6 +593,24 @@ void Wheel(PGraphics p, int WheelPos) {
     pos = pos - 170;
     p.stroke(pos * 3, 255 - pos * 3, 0);
   }
+}
+
+//Get a color from wheel instead.
+color Wheel(int WheelPos) {
+  int pos=WheelPos;
+  color c = color(0);
+  if(pos < 85) {
+    c= color(255-pos * 3, 0, pos * 3);
+  }
+  else if(pos < 170) {
+    pos = pos - 85;
+    c=color(0, pos * 3, 255 - pos * 3);
+  }
+  else if(pos > 169) {
+    pos = pos - 170;
+    c=color(pos * 3, 255 - pos * 3, 0);
+  }
+  return c;
 }
 
 //return specific components from Wheel, 
