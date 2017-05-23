@@ -68,6 +68,7 @@ float framerate=0;
 boolean directionToggle = true;
 int multiplier = 10;
 PImage[] images = new PImage[total_images];
+PImage longImage;
 int current_pattern;
 
 float angle=0;
@@ -89,11 +90,13 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
-  current_pattern = 16;
+  current_pattern = 14;
   for(int i=0;i<images.length;i++)
   {
     images[i] = loadImage("images/"+nf(i,2)+".jpg");
   }
+  longImage = loadImage("images/long01.jpg");
+  
   nowImage = images[floor(random(images.length))];
   if(fakeserial)
   {
@@ -180,13 +183,11 @@ void draw() {
 }
 
 //Patterns
-void image_rotater(PImage img)
+void image_scroller(PImage img)
 {
   pg.beginDraw();
-  pg.image(img,0,0,img.width,img.height);  
-  rotate(radians(wp%8 * 45));
-  pg.endDraw();    
-
+  pg.image(img,0-1200+oscillator*3,0,img.width,img.height);
+  pg.endDraw();
 }
 
 void image_zoomer(PImage img)
@@ -229,8 +230,6 @@ void image_bounce(PImage img)
 //void image_complex(PImage img) {
 // A more "refined" image handler, by Chainsaw.
 void image_complex(PImage img) {
-  pg.imageMode(CENTER); 
-  pg.colorMode(HSB);
   pg.beginDraw();
   pg.image(img,0-anglemagnitude*(1+sin(angle)),0-anglemagnitude*(1+cos(angle)));
   pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
@@ -443,15 +442,20 @@ void rainbow_fade_all()
      current_pattern--;
      if(current_pattern < 0)
        current_pattern = max_pattern;
+   }else{
+     current_pattern++;
+     if(current_pattern > max_pattern)
+       current_pattern = 0;
    }
-   current_pattern++;
-   if(current_pattern > max_pattern)
-     current_pattern = 0;
  }
 
 void callPattern(int pattern_number){
   //default all patterns to normal speed
   frequency = 1;
+  //and RGB (HSB colormodes must be changed in their switch case)
+  pg.colorMode(RGB);
+  //and Image Mode LEFT
+  pg.imageMode(CORNER); 
   
   switch(pattern_number){
     case 0 :
@@ -504,9 +508,12 @@ void callPattern(int pattern_number){
       off();
       break;
     case 15:
-      image_rotater(nowImage);
+      frequency = 4;
+      image_scroller(longImage);
       break;
     case 16:
+      pg.colorMode(HSB);    
+      pg.imageMode(CENTER); 
       image_complex(nowImage);
       break;
     default :
