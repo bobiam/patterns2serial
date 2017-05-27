@@ -1,6 +1,6 @@
 //From now on, just disable/enable serial here  //<>//
 //you may still need to update your COM ports in the serialConfigure() calls below 
-boolean fakeserial = true;
+boolean fakeserial = false;
 
 /*
   patterns2serial uses the movie2serial code and other code I've found around the web, 
@@ -54,9 +54,9 @@ int maxPorts=24; // maximum number of serial ports
 
 static int totalWidth = 600; //render width, you can bump this if you're not really writing to the display
 static int totalHeight = 8;  //render height, you can bump this if you're not really writing to the display
-static int max_pattern = 17; //actual pattern number of the final pattern in the list.
+static int max_pattern = 16; //actual pattern number of the final pattern in the list.
 //static int total_images = 1; //set to one for a quick initial start, good for debugging and/or guess and check pattern coding.
-static int total_images = 72; //one more than last name, since we index images on 0.
+static int total_images = 25; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -94,7 +94,7 @@ void setup() {
   println("Serial Ports List:");
   println(list);
   frameRate(framerate);  
-  current_pattern = 17;
+  current_pattern = 0;
   for (int i=0; i<images.length; i++)
   {
     images[i] = loadImage("images/"+nf(i, 2)+".jpg");
@@ -154,6 +154,12 @@ void draw() {
 
     if (frameCount % 2000 == 0) {
       nowImage = images[floor(random(images.length))];
+    }
+    
+    if (frameCount % 5000 == 0) {
+    current_pattern++;
+    if (current_pattern > max_pattern)
+      current_pattern = 0;
     }
   }
 
@@ -278,8 +284,9 @@ void play_ball() {
 void ellipses() {
   pg.beginDraw();
   pg.smooth();
+  int size = (int) random(20);
   pg.fill(random(255), random(255), random(255));
-  pg.ellipse(random(pg.width), random(pg.height), random(20), random(20));
+  pg.ellipse(random(pg.width), random(pg.height), size, size);
   pg.endDraw();
 }
 
@@ -470,7 +477,10 @@ void callPattern(int pattern_number) {
 
   switch(pattern_number) {
   case 0 :
+    //all(255,255,255,255);
+    //off();
     rainbros();
+    //off();
     break;
   case 1 :
     image_zoomer(nowImage);
@@ -490,13 +500,15 @@ void callPattern(int pattern_number) {
     fade(20);
     break;
   case 6 : 
-    text_test();
+    //text_test();
+    rainbow_fade_all();
     break;
   case 7 : 
-    rand_dots(100000);
+    rand_dots(10000);
     break;
   case 8 : 
-    stroke(1, 50, 255, 255, 255);
+  image_zoomer(nowImage);
+    //stroke(1, 50, 255, 255, 255);
     break;
   case 9 : 
     rain_columns();
@@ -509,7 +521,7 @@ void callPattern(int pattern_number) {
     fireflies(20, 0, 255, 0);
     break;
   case 12 :
-    randy(20);
+    randy(15);
     break;
   case 13 : 
     rainbow_fade_all();
@@ -714,7 +726,7 @@ int colorWiring(int c) {
   red = gammatable[red];
   green = gammatable[green];
   blue = gammatable[blue];
-  return (green << 16) | (red << 8) | (blue); // GRB - most common wiring
+  return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
 }
 
 // ask a Teensy board for its LED configuration, and set up the info for it.
