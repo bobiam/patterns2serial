@@ -47,16 +47,19 @@ PGraphics pg;
 PGraphics pg_1;
 
 int wp = 0; //wheel position, a counter that increments every draw, and cycles at 255.
+int wp2 = 0; //wheel position 2, same as wp, but half as frequent.
+boolean wp2_toggle = false;
+
 float gamma = 1.7;
 
 int numPorts=0;  // the number of serial ports in use
 int maxPorts=24; // maximum number of serial ports
 
-static int totalWidth = 600; //render width, you can bump this if you're not really writing to the display
+static int totalWidth = 120; //render width, you can bump this if you're not really writing to the display
 static int totalHeight = 8;  //render height, you can bump this if you're not really writing to the display
 static int max_pattern = 16; //actual pattern number of the final pattern in the list.
-//static int total_images = 1; //set to one for a quick initial start, good for debugging and/or guess and check pattern coding.
-static int total_images = 25; //one more than last name, since we index images on 0.
+static int total_images = 2; //set to 2 for a quick initial start, good for debugging and/or guess and check pattern coding.
+//static int total_images = 25; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
 Rectangle[] ledArea = new Rectangle[maxPorts]; // the area of the movie each port gets, in % (0-100)
@@ -106,7 +109,7 @@ void setup() {
   {
     fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
   } else {
-    serialConfigure("COM5");  // change these to your port names
+    //serialConfigure("COM5");  // change these to your port names
     serialConfigure("COM6");  // change these to your port names
   }
   //  serialConfigure("/dev/ttyACM1");
@@ -116,7 +119,7 @@ void setup() {
   }
   pg = createGraphics(totalWidth, totalHeight);
   pg.beginDraw();
-  pg.background(0);
+  pg.background(120,0,0);
   pg.endDraw();
 }
 
@@ -151,6 +154,17 @@ void draw() {
       if (random(5) < 2) anglespeed = -anglespeed;
       wp = 0;
     }               
+    
+    if(wp2_toggle)
+    {
+      if (wp2 < 255 && wp2 > -1)
+      {
+        wp2++;
+      } else {
+        wp2 = 0;
+      }             
+    }
+    wp2_toggle = !wp2_toggle;
 
     if (frameCount % 2000 == 0) {
       nowImage = images[floor(random(images.length))];
@@ -260,15 +274,15 @@ void image_complex(PImage img) {
 //political and technical
 //political example: public perception based on what we write/allow written
 //technical example: Not sure this is going to display right anyway.
-void text_test()
+void text_test(String message)
 {
   pg.beginDraw();
   pg.smooth();
   pg.background(0);
   pg.fill(255);
   pg.textAlign(CENTER, CENTER);
-  int multiplier = pg.width / 255;
-  pg.text("Hello World!", pg.width-wp*multiplier, pg.height/4);
+  //int multiplier = pg.width / 255;
+  pg.text(message, pg.width+(4*message.length())-wp2, pg.height/4);
   pg.endDraw();
 }
 
@@ -479,7 +493,9 @@ void callPattern(int pattern_number) {
   case 0 :
     //all(255,255,255,255);
     //off();
-    rainbros();
+    //rand_dots(10000);
+    text_test("Hello World");
+    //rainbros();
     //off();
     break;
   case 1 :
@@ -500,8 +516,7 @@ void callPattern(int pattern_number) {
     fade(20);
     break;
   case 6 : 
-    //text_test();
-    rainbow_fade_all();
+    text_test("Hello World");
     break;
   case 7 : 
     rand_dots(10000);
@@ -726,7 +741,8 @@ int colorWiring(int c) {
   red = gammatable[red];
   green = gammatable[green];
   blue = gammatable[blue];
-  return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
+  //return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
+  return (green << 16) | (red << 8) | (blue); // GRB - most common wiring
 }
 
 // ask a Teensy board for its LED configuration, and set up the info for it.
