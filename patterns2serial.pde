@@ -1,6 +1,6 @@
 //From now on, just disable/enable serial here  //<>//
 //you may still need to update your COM ports in the serialConfigure() calls below 
-boolean fakeserial = false;
+boolean fakeserial = true;
 
 /*
   patterns2serial uses the movie2serial code and other code I've found around the web, 
@@ -86,6 +86,17 @@ float angle2=0;                                    //used by image_complex()
 float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
 
+int frame_delay = 0;                               //global speed control, ms per frame of delay added to baseline loop speed.
+
+/*
+int total_messages = 2;
+int[] message_patterns = new int[1];
+String[] messages = new String[total_messages];
+messages[0] = "Hello World";
+messages[1] = "Other World";
+*/
+
+
 void settings() {
   size(totalWidth, totalHeight);                   //set window size.
   framerate = 100;                                 //initial framerate
@@ -155,6 +166,8 @@ void draw() {
       wp = 0;
     }               
     
+    delay(frame_delay);
+    
     if(wp2_toggle)
     {
       if (wp2 < 255 && wp2 > -1)
@@ -172,6 +185,8 @@ void draw() {
     
     if (frameCount % 5000 == 0) {
     current_pattern++;
+    frame_delay = 0;  //reset frame delay before each new pattern.
+    
     if (current_pattern > max_pattern)
       current_pattern = 0;
     }
@@ -269,18 +284,17 @@ void image_complex(PImage img) {
   }
 }
 
-//void text_test()
-//trying this out.  Caution: if you're going to use this, there's a lot to think about.
-//political and technical
-//political example: public perception based on what we write/allow written
-//technical example: Not sure this is going to display right anyway.
-void text_test(String message)
+//void send_text()
+// accepts message - a string of text
+// and fd - how long do you want the global frame delay set?  
+void send_text(String message,int fd)
 {
+  frame_delay = fd;
   pg.beginDraw();
   pg.smooth();
   pg.background(0);
   pg.fill(255);
-  pg.textAlign(CENTER, CENTER);
+  pg.textAlign(LEFT, CENTER);
   //int multiplier = pg.width / 255;
   pg.text(message, pg.width+(4*message.length())-wp2, pg.height/4);
   pg.endDraw();
@@ -494,7 +508,6 @@ void callPattern(int pattern_number) {
     //all(255,255,255,255);
     //off();
     //rand_dots(10000);
-    text_test("Hello World");
     //rainbros();
     //off();
     break;
@@ -516,7 +529,7 @@ void callPattern(int pattern_number) {
     fade(20);
     break;
   case 6 : 
-    text_test("Hello World");
+    send_text("Hello World",10);
     break;
   case 7 : 
     rand_dots(10000);
