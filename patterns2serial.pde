@@ -96,6 +96,7 @@ float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
 
 void settings() {
+  size(1200, 600);                   //set window size.
   framerate = 100;                                 //initial framerate
 }
 
@@ -115,9 +116,11 @@ void setup() {
   nowImage = images[floor(random(images.length))];
   if (fakeserial)
   {
-    //serialConfigure("COM5");  // change these to your port names
+    fakeSerial(); 
   } else {
-    serialConfigure("COM5");  // change these to your port names
+    println("BE AWARE - YOU ARE FAKING SERIAL.  LIGHTS WILL NOT WORK");
+    println("SET FAKESERIAL TO FALSE TO SEND DATA");
+    //serialConfigure("COM5");  // change these to your port names
     serialConfigure("COM6");  // change these to your port names
   }
   //  serialConfigure("/dev/ttyACM1");
