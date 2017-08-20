@@ -1,9 +1,13 @@
 //From now on, just disable/enable serial here  //<>// //<>// //<>// //<>//
 //you may still need to update your COM ports in the serialConfigure() calls below 
-boolean fakeserial = true;
-int globalbrightness=255;
+boolean fakeserial = false;
+int globalbrightness=1;
+int frame_delay = 10;
+
+int embiggen = 8; //how much bigger you want your fake screen;
+
 String txt;
-boolean txtscrolling=false;
+boolean txtscrolling=true;
 String[] text1={"This Happens Often.","It does, doesn't it"};
 String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
 String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
@@ -92,7 +96,6 @@ float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
 
 void settings() {
-  size(totalWidth, totalHeight);                   //set window size.
   framerate = 100;                                 //initial framerate
 }
 
@@ -112,7 +115,7 @@ void setup() {
   nowImage = images[floor(random(images.length))];
   if (fakeserial)
   {
-    fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
+    //serialConfigure("COM5");  // change these to your port names
   } else {
     serialConfigure("COM5");  // change these to your port names
     serialConfigure("COM6");  // change these to your port names
@@ -124,6 +127,7 @@ void setup() {
   }
   getText();
   pg = createGraphics(totalWidth, totalHeight);
+  pg_1 = createGraphics(totalWidth*embiggen, totalHeight*embiggen);
   pg.beginDraw();
   pg.background(0);
   pg.endDraw();
@@ -142,7 +146,6 @@ void draw() {
   {
       pg.beginDraw();
       callPattern(current_pattern);
-      tint(globalbrightness);
       pg.endDraw();
    
 
@@ -164,20 +167,18 @@ void draw() {
       if (random(5) < 2) anglespeed = -anglespeed;
       wp = 0;
     }               
+    
+    delay(frame_delay);
 
     if (frameCount % 2000 == 0) {
       nowImage = images[floor(random(images.length))];
     }
     
     if (frameCount % 5000 == 0) {
-    current_pattern++;
-    getText();
-    if (current_pattern > max_pattern)
-      current_pattern = 0;
+      nextPattern();
     }
   }
-
-
+      pg.tint(globalbrightness);
 
   for (int i=0; i < numPorts; i++) {
     // copy a portion of the screen's image to the LED image
@@ -203,6 +204,10 @@ void draw() {
     // send the raw data to the LEDs  :-)
     if (!fakeserial) ledSerial[i].write(ledData);
     image(pg, 0, 0, totalWidth, totalHeight);
+    
+    pg_1 = pg;
+    image(pg_1,50,50,totalWidth*embiggen,totalHeight*embiggen);
+    //pg_1.resize(totalWidth*10,totalHeight*10);    
   }
 }
 
@@ -259,17 +264,12 @@ void image_complex(PImage img) {
 }
 
 //void text_test()
-//trying this out.  Caution: if you're going to use this, there's a lot to think about.
-//political and technical
-//political example: public perception based on what we write/allow written
-//technical example: Not sure this is going to display right anyway.
 void text_test()
 {
   pg.smooth();
   pg.background(0);
   pg.fill(255);
-
-
+  
   if (txtscrolling) 
   {
     pg.textAlign(LEFT, CENTER);
@@ -294,6 +294,7 @@ void ellipses() {
   int size = (int) random(20);
   pg.fill(random(255), random(255), random(255));
   pg.ellipse(random(pg.width), random(pg.height), size, size);
+  frame_delay = 200;
 }
 
 //void rand_columns(int number_to_draw){
@@ -444,10 +445,17 @@ void mouseClicked() {
     if (current_pattern < 0)
       current_pattern = max_pattern;
   } else {
-    current_pattern++;
-    if (current_pattern > max_pattern)
-      current_pattern = 0;
+    nextPattern();
   }
+}
+
+void nextPattern()
+{
+    frame_delay = 0;
+    getText();
+    current_pattern++;  
+    if (current_pattern > max_pattern)
+      current_pattern = 0;    
 }
 
 void callPattern(int pattern_number) {
@@ -464,6 +472,7 @@ void callPattern(int pattern_number) {
   case 0 :
     //all(255,255,255,255);
     //off();
+    frame_delay = 20;
     text_test();
     //rainbros();
     //off();
