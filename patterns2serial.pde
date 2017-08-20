@@ -1,7 +1,15 @@
-//From now on, just disable/enable serial here  //<>//
+//From now on, just disable/enable serial here  //<>// //<>// //<>// //<>//
 //you may still need to update your COM ports in the serialConfigure() calls below 
 boolean fakeserial = true;
-
+int globalbrightness=255;
+String txt;
+boolean txtscrolling=false;
+String[] text1={"This Happens Often.","It does, doesn't it"};
+String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
+String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
+String[] text4= {"Wow this one is rare","Yeah, I've been waiting a while to see it"};
+String[] text5= {"This one is super collectible.","I bet only 1/10th of Burning man will see it."};
+String[] text6= {"This one isn't that much rarer than the last.","But it still doesn't happen alot"};
 /*
   patterns2serial uses the movie2serial code and other code I've found around the web, 
  with a little bit of glue and a few patterns I've borrowed from older projects, 
@@ -47,9 +55,6 @@ PGraphics pg;
 PGraphics pg_1;
 
 int wp = 0; //wheel position, a counter that increments every draw, and cycles at 255.
-int wp2 = 0; //wheel position 2, same as wp, but half as frequent.
-boolean wp2_toggle = false;
-
 float gamma = 1.7;
 
 int numPorts=0;  // the number of serial ports in use
@@ -58,7 +63,7 @@ int maxPorts=24; // maximum number of serial ports
 static int totalWidth = 120; //render width, you can bump this if you're not really writing to the display
 static int totalHeight = 8;  //render height, you can bump this if you're not really writing to the display
 static int max_pattern = 16; //actual pattern number of the final pattern in the list.
-static int total_images = 2; //set to 2 for a quick initial start, good for debugging and/or guess and check pattern coding.
+static int total_images = 2; //set lower for a quick initial start, good for debugging and/or guess and check pattern coding.
 //static int total_images = 25; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
@@ -86,17 +91,6 @@ float angle2=0;                                    //used by image_complex()
 float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
 
-int frame_delay = 0;                               //global speed control, ms per frame of delay added to baseline loop speed.
-
-/*
-int total_messages = 2;
-int[] message_patterns = new int[1];
-String[] messages = new String[total_messages];
-messages[0] = "Hello World";
-messages[1] = "Other World";
-*/
-
-
 void settings() {
   size(totalWidth, totalHeight);                   //set window size.
   framerate = 100;                                 //initial framerate
@@ -120,7 +114,7 @@ void setup() {
   {
     fakeSerial(); //comment this out to stop faking serial connection, but uncomment the following and use the console to find your teensy ports.
   } else {
-    //serialConfigure("COM5");  // change these to your port names
+    serialConfigure("COM5");  // change these to your port names
     serialConfigure("COM6");  // change these to your port names
   }
   //  serialConfigure("/dev/ttyACM1");
@@ -128,9 +122,10 @@ void setup() {
   for (int i=0; i < 256; i++) {
     gammatable[i] = (int)(pow((float)i / 255.0, gamma) * 255.0 + 0.5);
   }
+  getText();
   pg = createGraphics(totalWidth, totalHeight);
   pg.beginDraw();
-  pg.background(120,0,0);
+  pg.background(0);
   pg.endDraw();
 }
 
@@ -145,7 +140,11 @@ void draw() {
   //check our global speed variable.
   if (frequency != 0 && frameCount % frequency == 0)
   {
-    callPattern(current_pattern);
+      pg.beginDraw();
+      callPattern(current_pattern);
+      tint(globalbrightness);
+      pg.endDraw();
+   
 
     x_wrap = AddWithWrap(x_wrap, 1, pg.width);
 
@@ -165,19 +164,6 @@ void draw() {
       if (random(5) < 2) anglespeed = -anglespeed;
       wp = 0;
     }               
-    
-    delay(frame_delay);
-    
-    if(wp2_toggle)
-    {
-      if (wp2 < 255 && wp2 > -1)
-      {
-        wp2++;
-      } else {
-        wp2 = 0;
-      }             
-    }
-    wp2_toggle = !wp2_toggle;
 
     if (frameCount % 2000 == 0) {
       nowImage = images[floor(random(images.length))];
@@ -185,8 +171,7 @@ void draw() {
     
     if (frameCount % 5000 == 0) {
     current_pattern++;
-    frame_delay = 0;  //reset frame delay before each new pattern.
-    
+    getText();
     if (current_pattern > max_pattern)
       current_pattern = 0;
     }
@@ -224,37 +209,28 @@ void draw() {
 //Patterns
 void image_scroller(PImage img)
 {
-  pg.beginDraw();
   pg.image(img, 0-1200+oscillator*3, 0, img.width, img.height);
-  pg.endDraw();
 }
 
 void image_zoomer(PImage img)
 {
-  pg.beginDraw();
   pg.image(img, 0-oscillator, 0-oscillator, img.width+oscillator*2, img.height+oscillator*2);  
-  pg.endDraw();
 }
 
 void image_shaker(PImage img)
 {
-  pg.beginDraw();
   pg.image(img, 0-random(oscillator), 0-random(oscillator), img.width, img.height);
-  pg.endDraw();
 }
 
 void image_panner(PImage img)
 {
-  pg.beginDraw();
   pg.image(img, 0-oscillator, 0-oscillator, img.width, img.height);
-  pg.endDraw();
 }
 
 //void image_bounce(PImage img)
 //simple up/down animation
 void image_bounce(PImage img)
 {
-  pg.beginDraw();  
   int h_multiplier = img.height / 255;
   if (directionToggle)
   {
@@ -263,18 +239,15 @@ void image_bounce(PImage img)
     pg.image(img, 0, 0-255*h_multiplier+wp*h_multiplier, pg.width, img.height);
   }
   //pg.background(photo);
-  pg.endDraw();
 }
 
 //void image_complex(PImage img) {
 // A more "refined" image handler, by Chainsaw.
 void image_complex(PImage img) {
-  pg.beginDraw();
   pg.image(img, 0-anglemagnitude*(1+sin(angle)), 0-anglemagnitude*(1+cos(angle)));
   pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
   pg.rotate(angle);
   pg.image(img, 0-anglemagnitude*(1+sin(angle)), 0-anglemagnitude*(1+cos(angle)), img.width + anglemagnitude2*(1+sin(angle2)), img.height+ anglemagnitude2*(1+cos(angle2)));
-  pg.endDraw();  
   for (int x = 0; x < pg.width; x++) {
     for (int y = 0; y < pg.height; y++ ) {
       int loc = x + y*pg.width;
@@ -282,47 +255,51 @@ void image_complex(PImage img) {
       pg.pixels[loc]  =color((hue(pg.pixels[loc]) + wp )%256, saturation(pg.pixels[loc]), brightness(pg.pixels[loc]));  // White
     }
   }
+  image(pg,0,0);
 }
 
-//void send_text()
-// accepts message - a string of text
-// and fd - how long do you want the global frame delay set?  
-void send_text(String message,int fd)
+//void text_test()
+//trying this out.  Caution: if you're going to use this, there's a lot to think about.
+//political and technical
+//political example: public perception based on what we write/allow written
+//technical example: Not sure this is going to display right anyway.
+void text_test()
 {
-  frame_delay = fd;
-  pg.beginDraw();
   pg.smooth();
   pg.background(0);
   pg.fill(255);
-  pg.textAlign(LEFT, CENTER);
-  //int multiplier = pg.width / 255;
-  pg.text(message, pg.width+(4*message.length())-wp2, pg.height/4);
-  pg.endDraw();
+
+
+  if (txtscrolling) 
+  {
+    pg.textAlign(LEFT, CENTER);
+    float multiplier =  (pg.width+textWidth(txt)) / 255;
+    pg.text(txt, pg.width-wp*multiplier, pg.height/4);//
+  }
+  else{
+    pg.textAlign(CENTER, CENTER);
+    pg.text(txt, pg.width/2, pg.height/4);
+  }
 }
 
 //runs a circle around the ring
 void play_ball() {
-  pg.beginDraw();
   pg.fill(wheel_r(wp), wheel_g(wp), wheel_b(wp));
   pg.ellipse(x_wrap, 4, 8, 8);
-  pg.endDraw();
 }
 
 //draws a bunch of random ovals.  Mostly just playing with shapes.
 void ellipses() {
-  pg.beginDraw();
   pg.smooth();
   int size = (int) random(20);
   pg.fill(random(255), random(255), random(255));
   pg.ellipse(random(pg.width), random(pg.height), size, size);
-  pg.endDraw();
 }
 
 //void rand_columns(int number_to_draw){
 //lights a randomized number of columns (0 to number_to_draw)
 //number to draw
 void rand_columns(int number_to_draw) {
-  pg.beginDraw();
   //pg.background(0);
   pg.stroke(random(255), random(255), random(255), 100);
   for (int l=0; l< (int) random(number_to_draw); l++)
@@ -330,7 +307,6 @@ void rand_columns(int number_to_draw) {
     int k = (int) random(0, pg.width);
     pg.line(k, 0, k, pg.height);
   }
-  pg.endDraw(); 
   if (j < pg.width) {
     j++;
   } else {
@@ -342,14 +318,12 @@ void rand_columns(int number_to_draw) {
 //lights a randomized number of pods (0 to number_to_draw)
 //with a random color.
 void rand_dots(int number_to_draw) {
-  pg.beginDraw();
   for (int l = 0; l < (int) random(number_to_draw); l++) {
     int x = (int) random(0, pg.width);
     int y = (int) random(0, pg.height);
     pg.stroke(random(255), random(255), random(255), 100);
     pg.point(x, y);
   }
-  pg.endDraw();
 }
 
 //void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b){
@@ -363,7 +337,6 @@ void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b
     if (k != 0 && number_of_strokes != 0) {
       k_offset = pg.width / number_of_strokes;
     }
-    pg.beginDraw();
     pg.strokeWeight(3);
     pg.background(0);
     pg.stroke(random(max_r), random(max_g), random(max_b), 100);
@@ -373,7 +346,6 @@ void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b
     int sw = SubtractWithWrap(point_x, r1, pg.width);
     int aw = AddWithWrap(point_x, r2, pg.width);
     pg.line(j+k_offset, 0, random(sw, aw), pg.height);
-    pg.endDraw();
   }
   if (j < pg.width) {
     j++;
@@ -385,11 +357,9 @@ void stroke(int number_of_strokes, int distance, int max_r, int max_g, int max_b
 //void rain_columns(){
 //progressively sends a rainbow wheel around the ring
 void rain_columns() {
-  pg.beginDraw();
   color c = Wheel(wp);
   pg.stroke(c);
   pg.line(j, 0, j, pg.height);
-  pg.endDraw(); 
   if (j < pg.width) {
     j++;
   } else {
@@ -400,17 +370,14 @@ void rain_columns() {
 //void rain_columns_smooth(){
 //progressively sends a rainbow wheel around the ring
 void chase() {
-  pg.beginDraw();
   pg.background(0);
   Wheel(pg,x_wrap);
   pg.line(x_wrap,0,x_wrap,8);
-  pg.endDraw(); 
 }
 
 //void rainbros(){
 //paints the whole screen with a rainbow (ROYGBIVW) Top->Bottom, one color per row.
 void rainbros() {
-  pg.beginDraw();
   //pg.background(0);
   pg.stroke(255, 0, 0, 100);
   pg.line(0, 0, pg.width, 0);
@@ -428,8 +395,6 @@ void rainbros() {
   pg.line(0, 6, pg.width, 6);
   pg.stroke(255, 255, 255, 100);
   pg.line(0, 7, pg.width, 7);
-
-  pg.endDraw();
 }
 
 //void fireflies(int fade_amount, int r, int g, int b){
@@ -437,43 +402,35 @@ void rainbros() {
 //fade_amount is a percentage
 void fireflies(int fade_amount, int r, int g, int b) {
   pg.strokeWeight(1);  
-  pg.beginDraw();
   pg.stroke(r, g, b);
   pg.point(random(pg.width), random(pg.height));
   fade(fade_amount);  
-  pg.endDraw();
 }
 
 //void randy(int fade_amount)
 //randy accepts:
 // a fade amount (% to fade towards black each frame) 
 void randy(int fade_amount) {
-  pg.beginDraw();
   pg.stroke(random(255), random(255), random(255));
   pg.point(random(pg.width), random(pg.height));
   fade(fade_amount);  
-  pg.endDraw();
 }
 
 //sets a random row to a random color
 void rand_rows() {
-  pg.beginDraw();
   pg.stroke(random(255), random(255), random(255), 100);
   int row = (int) random(pg.height);
   pg.line(0, row, pg.width, row);
-  pg.endDraw();
 }
 
 //void rainbow_fade_all()
 //set the entire screen to a rotating colorwheel, all pixels same fade
 void rainbow_fade_all()
 {
-  pg.beginDraw();
   int r = wheel_r(wp);
   int g = wheel_g(wp);
   int b = wheel_b(wp);
   pg.background(r, g, b);
-  pg.endDraw();
 }
 
 //End of patterns.
@@ -507,7 +464,7 @@ void callPattern(int pattern_number) {
   case 0 :
     //all(255,255,255,255);
     //off();
-    //rand_dots(10000);
+    text_test();
     //rainbros();
     //off();
     break;
@@ -529,7 +486,8 @@ void callPattern(int pattern_number) {
     fade(20);
     break;
   case 6 : 
-    send_text("Hello World",10);
+    //text_test();
+    rainbow_fade_all();
     break;
   case 7 : 
     rand_dots(10000);
@@ -578,11 +536,9 @@ void callPattern(int pattern_number) {
 
 //nope, not gonna document this any further
 void off() {
-  pg.beginDraw();
   //pg.background(0);
   pg.stroke(0, 0, 0, 100);
-  pg.line(0, k, pg.width, k);
-  pg.endDraw(); 
+  pg.line(0, k, pg.width, k); 
   if (k < pg.height) {
     k++;
   } else {
@@ -592,9 +548,7 @@ void off() {
 
 //set everything to a color 
 void all(int r, int g, int b, int t) {
-  pg.beginDraw();
-  pg.background(r, g, b, t);
-  pg.endDraw(); 
+  pg.background(r, g, b, t); 
   /*
   pg.stroke(r,g,b, t);
    pg.line(0, k, pg.width, k);
@@ -610,13 +564,11 @@ void all(int r, int g, int b, int t) {
 //how much is the percent transparency of the black layer being drawn in 
 void fade(int howMuch)
 {
-  pg.beginDraw();
   pg.stroke(0, 0, 0, howMuch);
   for (int i=0; i<pg.height; i++)
   {
     pg.line(0, i, pg.width, i);
   }
-  pg.endDraw();
 }
 
 
@@ -754,8 +706,7 @@ int colorWiring(int c) {
   red = gammatable[red];
   green = gammatable[green];
   blue = gammatable[blue];
-  //return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
-  return (green << 16) | (red << 8) | (blue); // GRB - most common wiring
+  return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
 }
 
 // ask a Teensy board for its LED configuration, and set up the info for it.
@@ -864,4 +815,44 @@ int SubtractWithWrap(int a, int b, int wrap_at) {
     return a-b;
   }
   return (wrap_at+a)-b;
+}
+void getText()
+{
+    switch ( round(random(0,1)))
+   {
+     case 0:  //Hit 1/2 of the time
+       txt= text1[int (random(text1.length))];
+       break;
+     case 1:
+       switch (round(random(0,1)))
+       {
+         case 0: //Hit 1/4 of the time
+           txt= text2[int (random(text2.length))];
+           break;
+         case 1:
+           switch(round(random(0,1)))
+           {
+             case 0: // Hit 1/8 of the time
+               txt= text3[int (random(text3.length))];
+               break;
+             case 1:
+               switch (round(random(0,1)))
+               {
+                 case 0: //Hit 1/16 of the time
+                   txt= text4[int (random(text4.length))];
+                   break;
+                 case 1:
+                   switch(round(random(0,1)))
+                   {
+                     case 0: //Hit 1/32 of the time
+                       txt= text5[int (random(text5.length))];
+                       break;
+                     case 1:
+                       txt= text6[int (random(text6.length))];
+                       break;
+                   }
+               }
+           }
+       }
+   }
 }
