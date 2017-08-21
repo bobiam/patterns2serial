@@ -87,12 +87,12 @@ float anglemagnitude2 = 300;                       //used by image_complex()
 
 String[] txt;
 boolean txtscrolling;
-String[] text1={"This Happens /n Often.","it /n really is a long ordeal for this /n and sucks","It does, doesn't it"};
-String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
-String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
-String[] text4= {"Wow this one is rare","Yeah, I've been waiting a while to see it"};
-String[] text5= {"This one is super collectible.","I bet only 1/10th of Burning man will see it."};
-String[] text6= {"This one isn't that much rarer than the last.","But it still doesn't happen alot"};
+String[] text1={"This Happens /n Often.", "it /n really is a long ordeal for this /n and sucks", "It does, doesn't it"};
+String[] text2={"This Happens somewhat less Often.", "Though it is still somewhat frequent"};
+String[] text3=  {"I'm not seeing this text much.", "It doesn't come through"};
+String[] text4= {"Wow this one is rare", "Yeah, I've been waiting a while to see it"};
+String[] text5= {"This one is super collectible.", "I bet only 1/10th of Burning man will see it."};
+String[] text6= {"This one isn't that much rarer than the last.", "But it still doesn't happen alot"};
 
 int textSegment=0;
 int textCounter;      
@@ -116,7 +116,7 @@ void setup() {
   longImage = loadImage("images/long01.jpg");
 
   nowImage = images[floor(random(images.length))];
-  for(int i=0;i<list.length;i++){
+  for (int i=0; i<list.length; i++) {
     serialConfigure(list[i]); //just configure all the ones we find.
   }
   if (errorCount > 0) exit();
@@ -144,15 +144,15 @@ void draw() {
   {
     pg.beginDraw();
     callPattern(current_pattern);
-    pg.fill(0,255-globalbrightness);
-    pg.rect(-1,-1,pg.width+2,pg.height+2);
+    pg.fill(0, 255-globalbrightness);
+    pg.rect(-1, -1, pg.width+2, pg.height+2);
     pg.endDraw();
-    
+
     image(pg, 0, 0, totalWidth, totalHeight);
-    
+
     pg_1 = pg;
-    image(pg_1,50,50,totalWidth*embiggen,totalHeight*embiggen);
-    
+    image(pg_1, 0, 50, totalWidth*embiggen, totalHeight*embiggen);
+
     x_wrap = AddWithWrap(x_wrap, 1, pg.width);
 
     angle += anglespeed;
@@ -171,13 +171,13 @@ void draw() {
       if (random(5) < 2) anglespeed = -anglespeed;
       wp = 0;
     }               
-    
+
     delay(frame_delay);
 
     if (frameCount % 2000 == 0) {
       nowImage = images[floor(random(images.length))];
     }
-    
+
     if (frameCount % 5000 == 0) {
       incrementPattern();
     }
@@ -218,7 +218,7 @@ void image_scroller(PImage img)
 
 void image_zoomer(PImage img)
 {
-  pg.image(img, 0-oscillator, 0-oscillator, img.width+oscillator*2, img.height+oscillator*2);  
+  pg.image(img, -img.width/2, -img.height/2, img.width+oscillator*50, img.height+oscillator*50);
 }
 
 void image_shaker(PImage img)
@@ -259,7 +259,7 @@ void image_complex(PImage img) {
       pg.pixels[loc]  =color((hue(pg.pixels[loc]) + wp )%256, saturation(pg.pixels[loc]), brightness(pg.pixels[loc]));  // White
     }
   }
-  image(pg,0,0);
+  image(pg, 0, 0);
 }
 
 
@@ -286,26 +286,24 @@ void text_test()
       textCounter = 0;
       textSegment++;
     }
-  }
-  else{
+  } else {
     pg.textAlign(CENTER, CENTER);
     pg.text(txt[textSegment], pg.width/2, pg.height/4);
     textCounter ++;
     if (textCounter>textDelay)
     {
       textCounter = 0;
-      textSegment ++; 
+      textSegment ++;
     }
   }
 
   if (textSegment >= txt.length) 
   {
     incrementPattern();
-  }
-  else
+  } else
   {
     txtscrolling = (textWidth(txt[textSegment]) >= pg.width) ;
-  }       
+  }
 }
 
 //runs a circle around the ring
@@ -398,8 +396,8 @@ void rain_columns() {
 //progressively sends a rainbow wheel around the ring
 void chase() {
   pg.background(0);
-  Wheel(pg,x_wrap);
-  pg.line(x_wrap,0,x_wrap,8);
+  Wheel(pg, x_wrap);
+  pg.line(x_wrap, 0, x_wrap, 8);
 }
 
 //void rainbros(){
@@ -431,7 +429,7 @@ void fireflies(int fade_amount, int r, int g, int b) {
   pg.strokeWeight(1);  
   pg.stroke(r, g, b);
   pg.point(random(pg.width), random(pg.height));
-  fade(fade_amount);  
+  fade(fade_amount);
 }
 
 //void randy(int fade_amount)
@@ -440,7 +438,7 @@ void fireflies(int fade_amount, int r, int g, int b) {
 void randy(int fade_amount) {
   pg.stroke(random(255), random(255), random(255));
   pg.point(random(pg.width), random(pg.height));
-  fade(fade_amount);  
+  fade(fade_amount);
 }
 
 //sets a random row to a random color
@@ -482,8 +480,8 @@ void callPattern(int pattern_number) {
   pg.colorMode(RGB);
   //and Image Mode LEFT
   pg.imageMode(CORNER); 
-  
-  
+
+
 
   switch(pattern_number) {
   case 0 :
@@ -499,6 +497,7 @@ void callPattern(int pattern_number) {
     break;
   case 2 : 
     frequency = 5;
+    frame_delay = 50;
     image_shaker(nowImage);
     break;
   case 3 :
@@ -519,7 +518,7 @@ void callPattern(int pattern_number) {
     rand_dots(10000);
     break;
   case 8 : 
-  image_zoomer(nowImage);
+    image_zoomer(nowImage);
     //stroke(1, 50, 255, 255, 255);
     break;
   case 9 : 
@@ -552,7 +551,7 @@ void callPattern(int pattern_number) {
     image_complex(nowImage);
     break;
   case 17:
-    pg.stroke(0,255,0);
+    pg.stroke(0, 255, 0);
     chase();
   default :
     off();
@@ -617,14 +616,12 @@ void Wheel(PGraphics p, int WheelPos) {
 color Wheel(int WheelPos) {
   int pos=WheelPos;
   color c = color(0);
-  if(pos < 85) {
+  if (pos < 85) {
     c= color(255-pos * 3, 0, pos * 3);
-  }
-  else if(pos < 170) {
+  } else if (pos < 170) {
     pos = pos - 85;
     c=color(0, pos * 3, 255 - pos * 3);
-  }
-  else if(pos > 169) {
+  } else if (pos > 169) {
     pos = pos - 170;
     c=color(pos * 3, 255 - pos * 3, 0);
   }
@@ -834,68 +831,68 @@ int SubtractWithWrap(int a, int b, int wrap_at) {
 
 void getText()
 {  
-    String[] text=text1;
-    textCounter = 0;
-    textSegment = 0;
-    switch ( RoundedRandom())
-   {
-     case 0:  //Hit 1/2 of the time
-       text=text1;
-       break;
-     case 1:
-       switch (RoundedRandom())
-       {
-         case 0: //Hit 1/4 of the time
-           text= text2;
-           break;
-         case 1:
-           switch(RoundedRandom())
-           {
-             case 0: // Hit 1/8 of the time
-               text= text3;
-               break;
-             case 1:
-               switch (RoundedRandom())
-               {
-                 case 0: //Hit 1/16 of the time
-                   text= text4;
-                   break;
-                 case 1:
-                   switch(RoundedRandom())
-                   {
-                     case 0: //Hit 1/32 of the time
-                       text= text5;
-                       break;
-                     case 1:
-                       text= text6;
-                       break;
-                   }
-               }
-           }
-       }
-   }
-   txt= split(text[int (random(text.length))],"/n");
+  String[] text=text1;
+  textCounter = 0;
+  textSegment = 0;
+  switch ( RoundedRandom())
+  {
+  case 0:  //Hit 1/2 of the time
+    text=text1;
+    break;
+  case 1:
+    switch (RoundedRandom())
+    {
+    case 0: //Hit 1/4 of the time
+      text= text2;
+      break;
+    case 1:
+      switch(RoundedRandom())
+      {
+      case 0: // Hit 1/8 of the time
+        text= text3;
+        break;
+      case 1:
+        switch (RoundedRandom())
+        {
+        case 0: //Hit 1/16 of the time
+          text= text4;
+          break;
+        case 1:
+          switch(RoundedRandom())
+          {
+          case 0: //Hit 1/32 of the time
+            text= text5;
+            break;
+          case 1:
+            text= text6;
+            break;
+          }
+        }
+      }
+    }
+  }
+  txt= split(text[int (random(text.length))], "/n");
 }
 
 int RoundedRandom()
 {
-  return round(random(0,1));
+  return round(random(0, 1));
 }
 
 void incrementPattern()
 {
-    current_pattern++;
-    if (current_pattern > max_pattern)
-      current_pattern = 0;
-    frame_delay = 0;
-    getText();
+  current_pattern++;
+  if (current_pattern > max_pattern)
+    current_pattern = 0;
+  frame_delay = 0;
+  getText();
 }
 
 void decrementPattern()
 {
-    current_pattern--;
-    if (current_pattern < 0)
-      current_pattern = max_pattern;
-    frame_delay = 0;
-    getText();
+  current_pattern--;
+  if (current_pattern < 0)
+    current_pattern = max_pattern;
+  frame_delay = 0;
+  getText();
 }
