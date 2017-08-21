@@ -121,7 +121,10 @@ void setup() {
     fakeSerial(); 
   } else {
     //serialConfigure("COM5");  // change these to your port names
-    serialConfigure("COM6");  // change these to your port names
+    //serialConfigure("COM6");  // change these to your port names
+    for(int i=0;i<list.length;i++){
+      serialConfigure(list[i]); //just configure all the ones we find.
+    }
   }
   //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
@@ -745,7 +748,8 @@ void serialConfigure(String portName) {
   if (line == null) {
     println("Serial port " + portName + " is not responding.");
     println("Is it really a Teensy 3.0 running VideoDisplay?");
-    errorCount++;
+    //errorCount++;
+    //stopped making this a fatal, since we don't want it to fail just because there's another com port on the box.
     return;
   }
   String param[] = line.split(",");
