@@ -1,14 +1,14 @@
 //From now on, just disable/enable serial here  //<>// //<>// //<>// //<>//
 //you may still need to update your COM ports in the serialConfigure() calls below 
 boolean fakeserial = false;
-int globalbrightness=1;
+int globalbrightness=255;  // 0-255, 0 off, 255 blinding.  8 seems to be near the threshold for my LED prototype.
 int frame_delay = 10;
 
 int embiggen = 8; //how much bigger you want your fake screen;
 
 String txt;
 boolean txtscrolling=true;
-String[] text1={"This Happens Often.","It does, doesn't it"};
+String[] text1={"OMG BURNING MAN"};
 String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
 String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
 String[] text4= {"Wow this one is rare","Yeah, I've been waiting a while to see it"};
@@ -116,10 +116,10 @@ void setup() {
   nowImage = images[floor(random(images.length))];
   if (fakeserial)
   {
-    fakeSerial(); 
-  } else {
     println("BE AWARE - YOU ARE FAKING SERIAL.  LIGHTS WILL NOT WORK");
     println("SET FAKESERIAL TO FALSE TO SEND DATA");
+    fakeSerial(); 
+  } else {
     //serialConfigure("COM5");  // change these to your port names
     serialConfigure("COM6");  // change these to your port names
   }
@@ -147,11 +147,17 @@ void draw() {
   //check our global speed variable.
   if (frequency != 0 && frameCount % frequency == 0)
   {
-      pg.beginDraw();
-      callPattern(current_pattern);
-      pg.endDraw();
-   
-
+    pg.beginDraw();
+    callPattern(current_pattern);
+    pg.fill(0,255-globalbrightness);
+    pg.rect(-1,-1,pg.width+2,pg.height+2);
+    pg.endDraw();
+    
+    image(pg, 0, 0, totalWidth, totalHeight);
+    
+    pg_1 = pg;
+    image(pg_1,50,50,totalWidth*embiggen,totalHeight*embiggen);
+    
     x_wrap = AddWithWrap(x_wrap, 1, pg.width);
 
     angle += anglespeed;
@@ -181,8 +187,8 @@ void draw() {
       nextPattern();
     }
   }
-      pg.tint(globalbrightness);
 
+  pg.loadPixels();
   for (int i=0; i < numPorts; i++) {
     // copy a portion of the screen's image to the LED image
     int xoffset = percentage(pg.width, ledArea[i].x);
@@ -206,11 +212,6 @@ void draw() {
     }
     // send the raw data to the LEDs  :-)
     if (!fakeserial) ledSerial[i].write(ledData);
-    image(pg, 0, 0, totalWidth, totalHeight);
-    
-    pg_1 = pg;
-    image(pg_1,50,50,totalWidth*embiggen,totalHeight*embiggen);
-    //pg_1.resize(totalWidth*10,totalHeight*10);    
   }
 }
 
@@ -718,7 +719,8 @@ int colorWiring(int c) {
   red = gammatable[red];
   green = gammatable[green];
   blue = gammatable[blue];
-  return (red << 16) | (blue << 8) | (green); // GRB - most common wiring
+  //return (red << 16) | (blue << 8) | (green); // RBG - weird wiring for our L2Screen WS2811 pucks
+  return (green << 16) | (red << 8) | (blue); // GRB - most common wiring.
 }
 
 // ask a Teensy board for its LED configuration, and set up the info for it.
