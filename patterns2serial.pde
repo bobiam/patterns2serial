@@ -1,16 +1,8 @@
-int globalbrightness=255;  // 0-255, 0 off, 255 blinding.  8 seems to be near the threshold for my LED prototype. //<>//
-int frame_delay = 10;
-
+int globalbrightness=255;  // 0-255, 0 off, 255 blinding.  8 seems to be near the threshold for my LED prototype. //<>// //<>//
+int frame_delay = 0;
 int embiggen = 8; //how much bigger you want your fake screen;
+int textDelay=175;
 
-String txt;
-boolean txtscrolling=true;
-String[] text1={"OMG BURNING MAN"};
-String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
-String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
-String[] text4= {"Wow this one is rare","Yeah, I've been waiting a while to see it"};
-String[] text5= {"This one is super collectible.","I bet only 1/10th of Burning man will see it."};
-String[] text6= {"This one isn't that much rarer than the last.","But it still doesn't happen alot"};
 /*
   patterns2serial uses the movie2serial code and other code I've found around the web, 
  with a little bit of glue and a few patterns I've borrowed from older projects, 
@@ -91,6 +83,19 @@ float anglemagnitude = 10;                         //used by image_complex()
 float angle2=0;                                    //used by image_complex()
 float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
+
+
+String[] txt;
+boolean txtscrolling;
+String[] text1={"This Happens /n Often.","it /n really is a long ordeal for this /n and sucks","It does, doesn't it"};
+String[] text2={"This Happens somewhat less Often.","Though it is still somewhat frequent"};
+String[] text3=  {"I'm not seeing this text much.","It doesn't come through"};
+String[] text4= {"Wow this one is rare","Yeah, I've been waiting a while to see it"};
+String[] text5= {"This one is super collectible.","I bet only 1/10th of Burning man will see it."};
+String[] text6= {"This one isn't that much rarer than the last.","But it still doesn't happen alot"};
+
+int textSegment=0;
+int textCounter;      
 
 void settings() {
   size(1200, 600);                   //set window size.
@@ -174,7 +179,7 @@ void draw() {
     }
     
     if (frameCount % 5000 == 0) {
-      nextPattern();
+      incrementPattern();
     }
   }
 
@@ -257,23 +262,50 @@ void image_complex(PImage img) {
   image(pg,0,0);
 }
 
+
 //void text_test()
+//trying this out.  Caution: if you're going to use this, there's a lot to think about.
+//political and technical
+//political example: public perception based on what we write/allow written
+//technical example: Not sure this is going to display right anyway.
 void text_test()
 {
   pg.smooth();
   pg.background(0);
   pg.fill(255);
-  
+
+
   if (txtscrolling) 
   {
     pg.textAlign(LEFT, CENTER);
-    float multiplier =  (pg.width+textWidth(txt)) / 255;
-    pg.text(txt, pg.width-wp*multiplier, pg.height/4);//
+    float multiplier =  (pg.width+textWidth(txt[textSegment])) / 255;
+    pg.text(txt[textSegment], pg.width-textCounter*multiplier, pg.height/4);
+    textCounter++;
+    if (textCounter > 255) 
+    {
+      textCounter = 0;
+      textSegment++;
+    }
   }
   else{
     pg.textAlign(CENTER, CENTER);
-    pg.text(txt, pg.width/2, pg.height/4);
+    pg.text(txt[textSegment], pg.width/2, pg.height/4);
+    textCounter ++;
+    if (textCounter>textDelay)
+    {
+      textCounter = 0;
+      textSegment ++; 
+    }
   }
+
+  if (textSegment >= txt.length) 
+  {
+    incrementPattern();
+  }
+  else
+  {
+    txtscrolling = (textWidth(txt[textSegment]) >= pg.width) ;
+  }       
 }
 
 //runs a circle around the ring
@@ -434,23 +466,14 @@ void rainbow_fade_all()
 //Helpful tools follow
 
 void mouseClicked() {
-  if (mouseX < pg.width / 2) {
-    current_pattern--;
-    if (current_pattern < 0)
-      current_pattern = max_pattern;
+  if (mouseX < width / 2) {
+    decrementPattern();
   } else {
-    nextPattern();
+    incrementPattern();
   }
 }
 
-void nextPattern()
-{
-    frame_delay = 0;
-    getText();
-    current_pattern++;  
-    if (current_pattern > max_pattern)
-      current_pattern = 0;    
-}
+
 
 void callPattern(int pattern_number) {
   //default all patterns to normal speed
@@ -808,43 +831,71 @@ int SubtractWithWrap(int a, int b, int wrap_at) {
   }
   return (wrap_at+a)-b;
 }
+
 void getText()
-{
-    switch ( round(random(0,1)))
+{  
+    String[] text=text1;
+    textCounter = 0;
+    textSegment = 0;
+    switch ( RoundedRandom())
    {
      case 0:  //Hit 1/2 of the time
-       txt= text1[int (random(text1.length))];
+       text=text1;
        break;
      case 1:
-       switch (round(random(0,1)))
+       switch (RoundedRandom())
        {
          case 0: //Hit 1/4 of the time
-           txt= text2[int (random(text2.length))];
+           text= text2;
            break;
          case 1:
-           switch(round(random(0,1)))
+           switch(RoundedRandom())
            {
              case 0: // Hit 1/8 of the time
-               txt= text3[int (random(text3.length))];
+               text= text3;
                break;
              case 1:
-               switch (round(random(0,1)))
+               switch (RoundedRandom())
                {
                  case 0: //Hit 1/16 of the time
-                   txt= text4[int (random(text4.length))];
+                   text= text4;
                    break;
                  case 1:
-                   switch(round(random(0,1)))
+                   switch(RoundedRandom())
                    {
                      case 0: //Hit 1/32 of the time
-                       txt= text5[int (random(text5.length))];
+                       text= text5;
                        break;
                      case 1:
-                       txt= text6[int (random(text6.length))];
+                       text= text6;
                        break;
                    }
                }
            }
        }
    }
+   txt= split(text[int (random(text.length))],"/n");
+}
+
+int RoundedRandom()
+{
+  return round(random(0,1));
+}
+
+void incrementPattern()
+{
+    current_pattern++;
+    if (current_pattern > max_pattern)
+      current_pattern = 0;
+    frame_delay = 0;
+    getText();
+}
+
+void decrementPattern()
+{
+    current_pattern--;
+    if (current_pattern < 0)
+      current_pattern = max_pattern;
+    frame_delay = 0;
+    getText();
 }
