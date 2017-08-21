@@ -1,7 +1,4 @@
-//From now on, just disable/enable serial here  //<>// //<>// //<>// //<>//
-//you may still need to update your COM ports in the serialConfigure() calls below 
-boolean fakeserial = false;
-int globalbrightness=255;  // 0-255, 0 off, 255 blinding.  8 seems to be near the threshold for my LED prototype.
+int globalbrightness=255;  // 0-255, 0 off, 255 blinding.  8 seems to be near the threshold for my LED prototype. //<>//
 int frame_delay = 10;
 
 int embiggen = 8; //how much bigger you want your fake screen;
@@ -114,19 +111,9 @@ void setup() {
   longImage = loadImage("images/long01.jpg");
 
   nowImage = images[floor(random(images.length))];
-  if (fakeserial)
-  {
-    println("BE AWARE - YOU ARE FAKING SERIAL.  LIGHTS WILL NOT WORK");
-    println("SET FAKESERIAL TO FALSE TO SEND DATA");
-    fakeSerial(); 
-  } else {
-    //serialConfigure("COM5");  // change these to your port names
-    //serialConfigure("COM6");  // change these to your port names
-    for(int i=0;i<list.length;i++){
-      serialConfigure(list[i]); //just configure all the ones we find.
-    }
+  for(int i=0;i<list.length;i++){
+    serialConfigure(list[i]); //just configure all the ones we find.
   }
-  //  serialConfigure("/dev/ttyACM1");
   if (errorCount > 0) exit();
   for (int i=0; i < 256; i++) {
     gammatable[i] = (int)(pow((float)i / 255.0, gamma) * 255.0 + 0.5);
@@ -214,7 +201,7 @@ void draw() {
       ledData[2] = 0;
     }
     // send the raw data to the LEDs  :-)
-    if (!fakeserial) ledSerial[i].write(ledData);
+    ledSerial[i].write(ledData);
   }
 }
 
@@ -793,19 +780,6 @@ double percentageFloat(int percent) {
   if (percent ==  9) return 1.0 / 11.0;
   if (percent ==  8) return 1.0 / 12.0;
   return (double)percent / 100.0;
-}
-
-//pretend we're an L2Screen installation and allow us to write to a monitor only
-void fakeSerial() {
-  ledImage[numPorts] = new PImage(300, 8, RGB);
-  ledArea[numPorts] = new Rectangle(0, 0, 50, 100);
-  ledLayout[numPorts] = false;
-  numPorts++; 
-  ledImage[numPorts] = new PImage(300, 8, RGB);
-  ledArea[numPorts] = new Rectangle(0, 0, 0, 50);
-  ledLayout[numPorts] = true;
-  numPorts++;   
-  fakeserial=true;
 }
 
 //int AddWithWrap(int a, int b, int wrap_at){
