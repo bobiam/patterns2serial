@@ -56,7 +56,7 @@ int maxPorts=24; // maximum number of serial ports
 static int totalWidth = 120; //render width, you can bump this if you're not really writing to the display
 static int totalHeight = 8;  //render height, you can bump this if you're not really writing to the display
 static int max_pattern = 16; //actual pattern number of the final pattern in the list.
-static int total_images = 2; //set lower for a quick initial start, good for debugging and/or guess and check pattern coding.
+static int total_images = 31; //set lower for a quick initial start, good for debugging and/or guess and check pattern coding.
 //static int total_images = 25; //one more than last name, since we index images on 0.
 
 Serial[] ledSerial = new Serial[maxPorts];     // each port's actual Serial port
@@ -84,18 +84,18 @@ float angle2=0;                                    //used by image_complex()
 float anglespeed2=.007;                            //used by image_complex()
 float anglemagnitude2 = 300;                       //used by image_complex() 
 
-
 String[] txt;
 boolean txtscrolling;
-String[] text1={"This Happens /n Often.", "it /n really is a long ordeal for this /n and sucks", "It does, doesn't it"};
-String[] text2={"This Happens somewhat less Often.", "Though it is still somewhat frequent"};
-String[] text3=  {"I'm not seeing this text much.", "It doesn't come through"};
-String[] text4= {"Wow this one is rare", "Yeah, I've been waiting a while to see it"};
-String[] text5= {"This one is super collectible.", "I bet only 1/10th of Burning man will see it."};
-String[] text6= {"This one isn't that much rarer than the last.", "But it still doesn't happen alot"};
+String[] text1= {"Gigsville Fuck Off", "Time for Pie","Our learning curve is a circle","Bad Idea Theater","Safety Third","It's Not My Camel","Can I get a HOLY FUCKING SHIT?","It's not how we live, it's how we leave"};
+String[] text2= {"Thank you for 20 years Black Rock City","No Ocelots","We’re Not Doing this because it’s smart","Science!!","What if I said, 'Awe, Come On!'"};
+String[] text3= {"Sing, dance or drop your pants!", "You can always take more, you can’t take less","No thanks... /n I’ve already had my creepy hug today.","Don't put your mouth on anything in Gigsville"};
+String[] text4= {"Fuck Off Gigsville", "SAFETY /n FUCKING /n THIRD","The Evil Star is coming! "};
+String[] text5= {"Fuck /n /n Off /n /n Gigsville", "We’re Sorry in Advance"};
+String[] text6= {"Mijas... /n there’s a sandstorm coming!", "Fire is hot /n water is wet /n you cannot fly... /n ...and cars are always real"};
 
 int textSegment=0;
-int textCounter;      
+int textCounter;   
+PFont font;
 
 void settings() {
   size(1200, 600);                   //set window size.
@@ -109,13 +109,7 @@ void setup() {
   println(list);
   frameRate(framerate);  
   current_pattern = 0;
-  for (int i=0; i<images.length; i++)
-  {
-    images[i] = loadImage("images/"+nf(i, 2)+".jpg");
-  }
-  longImage = loadImage("images/long01.jpg");
 
-  nowImage = images[floor(random(images.length))];
   for (int i=0; i<list.length; i++) {
     serialConfigure(list[i]); //just configure all the ones we find.
   }
@@ -129,6 +123,19 @@ void setup() {
   pg.beginDraw();
   pg.background(0);
   pg.endDraw();
+  
+  pg.textFont(createFont("5x8_lcd_hd44780u_a02.ttf",8));
+  
+  for (int i=0; i<images.length; i++)
+  {
+    pg.beginDraw();
+    pg.background((255*i/3)%255,(255*(i+1)/3)%255,(255*(i+2)/3)%255);
+    pg.endDraw();
+    images[i] = loadImage("images/"+nf(i, 2)+".jpg");
+  }
+  longImage = loadImage("images/long01.jpg");
+
+  nowImage = images[floor(random(images.length))];
 }
 
 int j = 0; 
@@ -145,6 +152,7 @@ void draw() {
     pg.beginDraw();
     callPattern(current_pattern);
     pg.fill(0, 255-globalbrightness);
+    pg.stroke(0,255-globalbrightness);
     pg.rect(-1, -1, pg.width+2, pg.height+2);
     pg.endDraw();
 
@@ -173,10 +181,6 @@ void draw() {
     }               
 
     delay(frame_delay);
-
-    if (frameCount % 2000 == 0) {
-      nowImage = images[floor(random(images.length))];
-    }
 
     if (frameCount % 5000 == 0) {
       incrementPattern();
@@ -248,8 +252,9 @@ void image_bounce(PImage img)
 //void image_complex(PImage img) {
 // A more "refined" image handler, by Chainsaw.
 void image_complex(PImage img) {
+  pg.clear();
   pg.image(img, 0-anglemagnitude*(1+sin(angle)), 0-anglemagnitude*(1+cos(angle)));
-  pg.translate(width/2-anglemagnitude*(1+sin(angle)), height/2-anglemagnitude*(1+cos(angle)));
+  pg.translate(pg.width/2-anglemagnitude*(1+sin(angle)), pg.height/2-anglemagnitude*(1+cos(angle)));
   pg.rotate(angle);
   pg.image(img, 0-anglemagnitude*(1+sin(angle)), 0-anglemagnitude*(1+cos(angle)), img.width + anglemagnitude2*(1+sin(angle2)), img.height+ anglemagnitude2*(1+cos(angle2)));
   for (int x = 0; x < pg.width; x++) {
@@ -318,7 +323,7 @@ void ellipses() {
   int size = (int) random(20);
   pg.fill(random(255), random(255), random(255));
   pg.ellipse(random(pg.width), random(pg.height), size, size);
-  frame_delay = 200;
+  frame_delay = 50;
 }
 
 //void rand_columns(int number_to_draw){
@@ -487,12 +492,13 @@ void callPattern(int pattern_number) {
   case 0 :
     //all(255,255,255,255);
     //off();
-    frame_delay = 20;
+    frame_delay = 5;
     text_test();
     //rainbros();
     //off();
     break;
   case 1 :
+    frame_delay = 10;
     image_zoomer(nowImage);
     break;
   case 2 : 
@@ -886,6 +892,7 @@ void incrementPattern()
     current_pattern = 0;
   frame_delay = 0;
   getText();
+  nowImage = images[floor(random(images.length))];
 }
 
 void decrementPattern()
@@ -895,4 +902,5 @@ void decrementPattern()
     current_pattern = max_pattern;
   frame_delay = 0;
   getText();
+  nowImage = images[floor(random(images.length))];
 }
