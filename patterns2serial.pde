@@ -86,9 +86,9 @@ float anglemagnitude2 = 300;                       //used by image_complex()
 
 String[] txt;
 boolean txtscrolling;
-String[] text1= {"Gigsville Fuck Off", "Time for Pie","Our learning curve is a circle","Bad Idea Theater","Safety Third","It's Not My Camel","Can I get a HOLY FUCKING SHIT?","It's not how we live, it's how we leave"};
-String[] text2= {"Thank you for 20 years Black Rock City","No Ocelots","We’re Not Doing this because it’s smart","Science!!","What if I said, 'Awe, Come On!'"};
-String[] text3= {"Sing, dance or drop your pants!", "You can always take more, you can’t take less","No thanks... /n I’ve already had my creepy hug today.","Don't put your mouth on anything in Gigsville"};
+String[] text1= {"Gigsville Fuck Off", "Time for Pie","Safety Third","It's Not My Camel","Can I get a HOLY FUCKING SHIT?","It's not how we live, it's how we leave"};
+String[] text2= {"Thank you for 20 years Black Rock City","No Ocelots","We’re Not Doing this because it’s smart","Science!!","Our learning curve is a circle","Bad Idea Theater"};
+String[] text3= {"Sing, dance or drop your pants!", "You can always take more, you can’t take less","No thanks... I’ve already had my creepy hug today.","Don't put your mouth on anything in Gigsville","What if I said, 'Awe, Come On!'"};
 String[] text4= {"Fuck Off Gigsville", "SAFETY /n FUCKING /n THIRD","The Evil Star is coming! "};
 String[] text5= {"Fuck /n /n Off /n /n Gigsville", "We’re Sorry in Advance"};
 String[] text6= {"Mijas... /n there’s a sandstorm coming!", "Fire is hot /n water is wet /n you cannot fly... /n ...and cars are always real"};
@@ -109,7 +109,8 @@ void setup() {
   println(list);
   frameRate(framerate);  
   current_pattern = 0;
-
+  
+  // Initialize Serial
   for (int i=0; i<list.length; i++) {
     serialConfigure(list[i]); //just configure all the ones we find.
   }
@@ -117,24 +118,22 @@ void setup() {
   for (int i=0; i < 256; i++) {
     gammatable[i] = (int)(pow((float)i / 255.0, gamma) * 255.0 + 0.5);
   }
-  getText();
   pg = createGraphics(totalWidth, totalHeight);
   pg_1 = createGraphics(totalWidth*embiggen, totalHeight*embiggen);
   pg.beginDraw();
   pg.background(0);
   pg.endDraw();
   
+  //Initialize Text
+  getText();
   pg.textFont(createFont("5x8_lcd_hd44780u_a02.ttf",8));
   
+  //Initialize Images
   for (int i=0; i<images.length; i++)
-  {
-    pg.beginDraw();
-    pg.background((255*i/3)%255,(255*(i+1)/3)%255,(255*(i+2)/3)%255);
-    pg.endDraw();
+  {    
     images[i] = loadImage("images/"+nf(i, 2)+".jpg");
   }
   longImage = loadImage("images/long01.jpg");
-
   nowImage = images[floor(random(images.length))];
 }
 
